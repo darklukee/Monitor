@@ -1,6 +1,6 @@
 /**
  ******************************************************************************
- * @file    STM32F4-Discovery FreeRTOS demo\hw_config.c
+ * @file    STM32F4-Discovery FreeRTOS demo\hw_config.cpp
  * @brief   Hardware initialization
  ******************************************************************************
  */
@@ -9,13 +9,14 @@
 #include "hw_config.h"
 //#include "glcd_Config.h"
 #include "include/glcd_io.h"
+#include "LTC2991.h"
 
 /*-----------------------------------------------------------*/
 void prvSetupHardware(void)
 {
 	// Set the Vector Table base address at 0x08000000
 	NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4 );
+	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
 	// Configure LED IOs as output push-pull
 	// Initialize LEDs on STM32F4_Discovery board
@@ -30,6 +31,13 @@ void prvSetupHardware(void)
 
 	// Keyboard init with interupts
 	prvKeyboard_Config();
+
+	//Translator Output Enable conf and set it to 'enable'
+	prvSerialOE_Config();
+
+	//Set pins for communication with external chips
+	prvADC_GPIO_Config(); //i2c
+	prvPGA_GPIO_Config(); //spi
 
 	// Configure LIS302 in order to produce data used for TIM4 reconfiguration and LED control
 //	prvMEMS_Config();
@@ -61,10 +69,10 @@ void prvLED_Config(char state)
 		GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 		// Connect TIM4 pins to AF2
-		GPIO_PinAFConfig(GPIOD, GPIO_PinSource12, GPIO_AF_TIM4 );
-		GPIO_PinAFConfig(GPIOD, GPIO_PinSource13, GPIO_AF_TIM4 );
-		GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_TIM4 );
-		GPIO_PinAFConfig(GPIOD, GPIO_PinSource15, GPIO_AF_TIM4 );
+		GPIO_PinAFConfig(GPIOD, GPIO_PinSource12, GPIO_AF_TIM4);
+		GPIO_PinAFConfig(GPIOD, GPIO_PinSource13, GPIO_AF_TIM4);
+		GPIO_PinAFConfig(GPIOD, GPIO_PinSource14, GPIO_AF_TIM4);
+		GPIO_PinAFConfig(GPIOD, GPIO_PinSource15, GPIO_AF_TIM4);
 	}
 	/* Configuration of Timer4 to control LEDs based on MEMS data */
 	prvTIM4_Config();
@@ -78,13 +86,13 @@ void prvLCDLED_Config(void)
 	// Configure PC6
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz; //Timer bêdzie pracowa³ na poziomie kHz
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz; //Timer bï¿½dzie pracowaï¿½ na poziomie kHz
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF; //Timer
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 
 	// Connect TIM3 pins to AF2
-	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_TIM3 );
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource6, GPIO_AF_TIM3);
 
 	// Configuration of Timer3 to control LCD LED backlight
 	prvTIM3_Config();
@@ -105,10 +113,10 @@ const uint16_t KEY_EXTI_LINE[KEYn] =
 { KEY_UP_EXTI_LINE, KEY_DOWN_EXTI_LINE, KEY_LEFT_EXTI_LINE, KEY_RIGHT_EXTI_LINE, KEY_OK_EXTI_LINE, KEY_ESC_EXTI_LINE };
 const uint8_t KEY_PORT_SOURCE[KEYn] =
 { KEY_UP_EXTI_PORT_SOURCE, KEY_DOWN_EXTI_PORT_SOURCE, KEY_LEFT_EXTI_PORT_SOURCE, KEY_RIGHT_EXTI_PORT_SOURCE,
-		KEY_OK_EXTI_PORT_SOURCE, KEY_ESC_EXTI_PORT_SOURCE };
+KEY_OK_EXTI_PORT_SOURCE, KEY_ESC_EXTI_PORT_SOURCE };
 const uint8_t KEY_PIN_SOURCE[KEYn] =
 { KEY_UP_EXTI_PIN_SOURCE, KEY_DOWN_EXTI_PIN_SOURCE, KEY_LEFT_EXTI_PIN_SOURCE, KEY_RIGHT_EXTI_PIN_SOURCE,
-		KEY_OK_EXTI_PIN_SOURCE, KEY_ESC_EXTI_PIN_SOURCE };
+KEY_OK_EXTI_PIN_SOURCE, KEY_ESC_EXTI_PIN_SOURCE };
 const uint8_t KEY_IRQn[KEYn] =
 { KEY_UP_EXTI_IRQn, KEY_DOWN_EXTI_IRQn, KEY_LEFT_EXTI_IRQn, KEY_RIGHT_EXTI_IRQn, KEY_OK_EXTI_IRQn, KEY_ESC_EXTI_IRQn };
 
@@ -129,12 +137,12 @@ void prvKeyboard_Config(void)
 	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
 	EXTI_InitStructure.EXTI_LineCmd = ENABLE;
 	// Enable and set Button EXTI Interrupt to the lowest priority
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x0F; //thats correct, higher val means lower priority
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x0F;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 
 	//Pin specific:
-	for (int i = 0; i <= KEYn; i++)
+	for (int i = 0; i < KEYn; i++)
 	{
 		// Enable the BUTTON Clock
 		RCC_AHB1PeriphClockCmd(KEY_CLK[(Key_TypeDef) i], ENABLE);
@@ -152,8 +160,33 @@ void prvKeyboard_Config(void)
 		// Enable and set Button EXTI Interrupt to the lowest priority
 		NVIC_InitStructure.NVIC_IRQChannel = KEY_IRQn[(Key_TypeDef) i];
 		NVIC_Init(&NVIC_InitStructure);
-
 	}
+}
+
+void prvSerialOE_Config(void)
+{
+	// GPIOE Periph clock enable
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOE, ENABLE);
+
+	GPIO_InitTypeDef GPIO_InitStructure;
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_Init(GPIOE, &GPIO_InitStructure);
+
+	//Set to high to enable translator outputs
+	GPIO_SetBits(GPIOE, GPIO_Pin_6); //TODO: move to tasks, along with ADC and PGA
+}
+
+void prvADC_GPIO_Config(void)
+{
+	LTC2991::GPIO_Config();
+}
+void prvPGA_GPIO_Config(void)
+{
+
 }
 
 void prvTIM4_Config(void)
@@ -220,25 +253,25 @@ void prvTIM4_Config(void)
 	TIM_OC1Init(TIM4, &TIM_OCInitStructure);
 	TIM_CCxCmd(TIM4, TIM_Channel_1, DISABLE);
 
-	TIM_OC1PreloadConfig(TIM4, TIM_OCPreload_Enable );
+	TIM_OC1PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
 	/* Output Compare PWM1 Mode configuration: Channel2 */
 	TIM_OC2Init(TIM4, &TIM_OCInitStructure);
 	TIM_CCxCmd(TIM4, TIM_Channel_2, DISABLE);
 
-	TIM_OC2PreloadConfig(TIM4, TIM_OCPreload_Enable );
+	TIM_OC2PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
 	/* Output Compare PWM1 Mode configuration: Channel3 */
 	TIM_OC3Init(TIM4, &TIM_OCInitStructure);
 	TIM_CCxCmd(TIM4, TIM_Channel_3, DISABLE);
 
-	TIM_OC3PreloadConfig(TIM4, TIM_OCPreload_Enable );
+	TIM_OC3PreloadConfig(TIM4, TIM_OCPreload_Enable);
 
 	/* Output Compare PWM1 Mode configuration: Channel4 */
 	TIM_OC4Init(TIM4, &TIM_OCInitStructure);
 	TIM_CCxCmd(TIM4, TIM_Channel_4, DISABLE);
 
-	TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Enable );
+	TIM_OC4PreloadConfig(TIM4, TIM_OCPreload_Enable);
 }
 
 void prvTIM3_Config(void)
@@ -305,7 +338,7 @@ void prvTIM3_Config(void)
 	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
 	TIM_CCxCmd(TIM3, TIM_Channel_1, DISABLE);
 
-	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable );
+	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 }
 
 //void prvMEMS_Config(void)

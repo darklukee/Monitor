@@ -12,7 +12,6 @@ extern NVIC_InitTypeDef NVIC_InitStructure;
 /* TIM4 and TIM3 Autoreload and Capture Compare register values */
 #define TIM_ARR                          ((uint16_t)1999) //1 kHz na wyjsciu przy preskaler 200 khz
 #define TIM_CCR                          ((uint16_t)0) //0%
-
 /* definitions used by prvLED_Config() to reconfigure LED pins GPIO<->TIM4 */
 #define GPIO	0
 #define TIMER	1
@@ -24,9 +23,9 @@ void prvLED_Config(char state);
 void prvLCD_Config(void);
 void prvLCDLED_Config(void);
 void prvKeyboard_Config(void);
-void prvADC_Config(void);
-void prvPGA_Config(void);
 void prvSerialOE_Config(void);
+void prvADC_GPIO_Config(void);
+void prvPGA_GPIO_Config(void);
 
 //Keyboard key macros
 #define KEYn 6
@@ -82,8 +81,26 @@ void prvSerialOE_Config(void);
 typedef enum
 {
 	//order sensitive. DO NOT TOUCH
-	KEY_UP = 0, KEY_DOWN = 1, KEY_LEFT = 2, KEY_RIGHT = 3, KEY_OK = 4, KEY_ESC = 5,
+	KEY_UP = 0,
+	KEY_DOWN = 1,
+	KEY_LEFT = 2,
+	KEY_RIGHT = 3,
+	KEY_OK = 4,
+	KEY_ESC = 5,
 } Key_TypeDef;
+
+// I2C peripheral configuration defines
+#define ADC_I2C I2C3
+#define ADC_I2C_CLK RCC_APB1Periph_I2C3
+#define ADC_I2C_SCL_GPIO_CLOCK RCC_AHB1Periph_GPIOA
+#define ADC_I2C_SDA_GPIO_CLOCK RCC_AHB1Periph_GPIOC
+#define ADC_I2C_GPIO_AF GPIO_AF_I2C3
+#define ADC_I2C_SCL_GPIO GPIOA
+#define ADC_I2C_SDA_GPIO GPIOC
+#define ADC_I2C_SCL_PIN GPIO_Pin_8
+#define ADC_I2C_SDA_PIN GPIO_Pin_9
+#define ADC_I2C_SCL_PINSRC GPIO_PinSource8
+#define ADC_I2C_SDA_PINSRC GPIO_PinSource9
 
 //void prvMEMS_Config(void);
 //uint32_t LIS302DL_TIMEOUT_UserCallback(void);
