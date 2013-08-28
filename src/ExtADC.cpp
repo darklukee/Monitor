@@ -20,23 +20,23 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 
-#include "LTC2991.h"
+#include "ExtADC.h"
 #include "hw_config.h"
 #include "stm32f4xx_i2c.h"
 
-LTC2991::LTC2991()
+ExtADC::ExtADC()
 {
 	// TODO Auto-generated constructor stub
 
 	GPIO_Configured = false;
 }
 
-LTC2991::~LTC2991()
+ExtADC::~ExtADC()
 {
 	// TODO Auto-generated destructor stub
 }
 
-void LTC2991::GPIO_Config(void)
+void ExtADC::GPIO_Config(void)
 {
 	if (!GPIO_Configured)
 	{

@@ -9,7 +9,8 @@
 #include "hw_config.h"
 //#include "glcd_Config.h"
 #include "include/glcd_io.h"
-#include "LTC2991.h"
+#include "ExtADC.h"
+#include "PGA.h"
 
 /*-----------------------------------------------------------*/
 void prvSetupHardware(void)
@@ -182,11 +183,11 @@ void prvSerialOE_Config(void)
 
 void prvADC_GPIO_Config(void)
 {
-	LTC2991::GPIO_Config();
+	ExtADC::GPIO_Config();
 }
 void prvPGA_GPIO_Config(void)
 {
-
+	PGA::GPIO_Config();
 }
 
 void prvTIM4_Config(void)

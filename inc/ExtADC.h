@@ -23,11 +23,11 @@
 #ifndef LTC2991_H_
 #define LTC2991_H_
 
-class LTC2991
+class ExtADC
 {
 public:
-	LTC2991();
-	~LTC2991();
+	ExtADC();
+	~ExtADC();
 	static void GPIO_Config(void);
 
 private:
