@@ -1,5 +1,5 @@
 /*
- * LTC2991.cpp
+ * ExtADC.cpp
  *
  *  Created on: 28 sie 2013
  *      Author: lukee
@@ -24,11 +24,11 @@
 #include "hw_config.h"
 #include "stm32f4xx_i2c.h"
 
+bool ExtADC::GPIO_Configured = false;
+
 ExtADC::ExtADC()
 {
 	// TODO Auto-generated constructor stub
-
-	GPIO_Configured = false;
 }
 
 ExtADC::~ExtADC()
@@ -45,11 +45,11 @@ void ExtADC::GPIO_Config(void)
 	// Enable I2C GPIO clocks
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA | RCC_AHB1Periph_GPIOC, ENABLE);
 
-	// CODEC_I2C SCL and SDA pins common configuration
+	// ADC_I2C SCL and SDA pins common configuration
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
-	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP; //TODO: this may be problematic. External pull-up suggested.
 
 	//specific
 	GPIO_InitStructure.GPIO_Pin = ADC_I2C_SCL_PIN;
@@ -62,11 +62,11 @@ void ExtADC::GPIO_Config(void)
 	GPIO_PinAFConfig(ADC_I2C_SCL_GPIO, ADC_I2C_SCL_PINSRC, ADC_I2C_GPIO_AF);
 	GPIO_PinAFConfig(ADC_I2C_SDA_GPIO, ADC_I2C_SDA_PINSRC, ADC_I2C_GPIO_AF);
 
-	GPIO_Configured = true;
+	ExtADC::GPIO_Configured = true;
 	return;
 }
 
-void ExtADC::Init(void)
+void ExtADC::init(void)
 {
 	if (!GPIO_Configured)
 		GPIO_Config();
@@ -85,7 +85,49 @@ void ExtADC::Init(void)
 	I2C_Cmd(ADC_I2C, ENABLE);
 	I2C_Init(ADC_I2C, &I2C_InitStructure);
 
+	NVIC_InitTypeDef NVIC_InitStructure;
+
+	// I2C ER Interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = I2C3_ER_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; //highest priotiry
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0; //highest priotiry
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
+
+	// I2C EV Interrupt
+	NVIC_InitStructure.NVIC_IRQChannel = I2C3_EV_IRQn;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0; //highest priotiry
+	NVIC_Init(&NVIC_InitStructure);
+
 	return;
+}
 
+bool ExtADC::process(I2CData data, uint8_t* retVal)
+{
+	//TODO: finish implementation
+	if(data.dir == DirWrite)
+	{
+		//write stuff
+		i2cWrite(data.reg, data.val);
+		return false;
+	}
+	else
+	{
+		//read stuff
+		(*retVal) = i2cRead(data.reg);
+		return true;
+	}
+}
 
+void ExtADC::i2cWrite(uint8_t reg, uint8_t value)
+{
+
+	if (xQueueReceive(xQueue_I2CQuery,&xBuffer_receive,0) == pdPASS)
+	return;
+}
+
+uint8_t ExtADC::i2cRead(uint8_t reg)
+{
+
+	return 0;
 }

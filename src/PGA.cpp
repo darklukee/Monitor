@@ -38,5 +38,5 @@ PGA::~PGA()
 void PGA::GPIO_Config(void)
 {
 	//TODO: implement me!
-	GPIO_Configured = true;
+	//GPIO_Configured = true;
 }

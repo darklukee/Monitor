@@ -1,7 +1,7 @@
 /*
- * ExtADC.h
+ * ExtADCTask.h
  *
- *  Created on: 28 sie 2013
+ *  Created on: 29 sie 2013
  *      Author: lukee
  *
  * Copyright (C) 2013  darklukee
@@ -20,42 +20,24 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 
-#ifndef EXTADC_H_
-#define EXTADC_H_
+#ifndef EXTADCTASK_H_
+#define EXTADCTASK_H_
 
-#include <stdint.h>
+#include <cpp_task.hpp>
+#include "ExtADC.h"
 
-
-enum Dir
-{
-	DirWrite = 0,
-	DirRead = !DirWrite
-};
-
-struct I2CData
-{
-	uint8_t reg;
-	uint8_t val;
-	Dir dir;
-};
-
-class ExtADC
+class ExtADCTask: public scheduler_task
 {
 public:
-	ExtADC();
-	~ExtADC();
-	static void GPIO_Config(void);
-	void init(void);
-	void config(void);
-	bool process(I2CData data, uint8_t* retVal);
+	ExtADCTask();
+	~ExtADCTask();
+	bool init();
+	bool taskEntry();
+	bool run(void *param);
 
 private:
-	void i2cWrite(uint8_t reg, uint8_t value);
-	uint8_t i2cRead(uint8_t reg);
-
-
-	static bool GPIO_Configured;
-	static const uint8_t addr = 0x90; //LTC2991 hardware address
+	ExtADC extADC;
+	I2CData xBuffer_receive;
 };
 
-#endif /* EXTADC_H_ */
+#endif /* EXTADCTASK_H_ */

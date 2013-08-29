@@ -1,7 +1,7 @@
 /*
- * ExtADC.h
+ * ExtADCTask.cpp
  *
- *  Created on: 28 sie 2013
+ *  Created on: 29 sie 2013
  *      Author: lukee
  *
  * Copyright (C) 2013  darklukee
@@ -20,42 +20,34 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 
-#ifndef EXTADC_H_
-#define EXTADC_H_
+#include "ExtADCTask.h"
 
-#include <stdint.h>
+extern xQueueHandle xQueue_I2CQuery;
+extern xQueueHandle xQueue_I2CRx;
 
-
-enum Dir
+bool ExtADCTask::init()
 {
-	DirWrite = 0,
-	DirRead = !DirWrite
-};
+	extADC.init();
+	return true;
+}
 
-struct I2CData
+bool ExtADCTask::taskEntry()
 {
-	uint8_t reg;
-	uint8_t val;
-	Dir dir;
-};
+	extADC.config(); //TODO: setup LTC2991 for measurement
+	return true;
+}
 
-class ExtADC
+bool ExtADCTask::run(void *param)
 {
-public:
-	ExtADC();
-	~ExtADC();
-	static void GPIO_Config(void);
-	void init(void);
-	void config(void);
-	bool process(I2CData data, uint8_t* retVal);
-
-private:
-	void i2cWrite(uint8_t reg, uint8_t value);
-	uint8_t i2cRead(uint8_t reg);
-
-
-	static bool GPIO_Configured;
-	static const uint8_t addr = 0x90; //LTC2991 hardware address
-};
-
-#endif /* EXTADC_H_ */
+	if (xQueueReceive(xQueue_I2CQuery,&xBuffer_receive,0) == pdPASS)
+	{
+		uint8_t receive;
+		if (extADC.process(xBuffer_receive, &receive)) //TODO: this may fail
+		{
+			//receiver mode. send answer back
+			xQueueSend( xQueue_I2CRx, ( void * ) &receive, 0 );
+		}
+	}
+	taskYIELD(); //task is going to ready state to allow next one to run
+	return true;
+}

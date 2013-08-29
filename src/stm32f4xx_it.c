@@ -27,12 +27,14 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#include "queue.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-
+portBASE_TYPE xHigherPriorityTaskWoken;
+extern xQueueHandle xQueue_I2CEvent;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -160,6 +162,23 @@ void SysTick_Handler(void)
 void EXTI0_IRQHandler(void)
 {
 
+}
+
+void I2C3_ER_IRQHandler(void)
+{
+
+}
+
+void I2C3_EV_IRQHandler(void)
+{
+  xHigherPriorityTaskWoken = pdFALSE;
+  if(EXTI_GetITStatus(EXTI_Line0) != RESET)
+  {
+    //xSemaphoreGiveFromISR(xSemaphoreSW,&xHigherPriorityTaskWoken);
+  	 xQueueSendFromISR( xQueue_I2CEvent, I2C_GetLastEvent(I2C3), &xHigherPriorityTaskWoken ); //TODO poiter, references of sth
+
+	portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+  }
 }
 
 
