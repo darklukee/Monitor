@@ -31,7 +31,7 @@ public:
 	static void GPIO_Config(void);
 
 private:
-	bool GPIO_Configured;
+	static bool GPIO_Configured;
 };
 
 #endif /* PGA_H_ */

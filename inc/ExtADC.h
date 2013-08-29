@@ -29,6 +29,10 @@ public:
 	ExtADC();
 	~ExtADC();
 	static void GPIO_Config(void);
+	void Init(void);
+
+	void Write(uint8_t reg, uint8_t value);
+	uint8_t Read(uint8_t reg);
 
 private:
 	bool GPIO_Configured;

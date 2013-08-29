@@ -33,12 +33,12 @@ void prvSetupHardware(void)
 	// Keyboard init with interupts
 	prvKeyboard_Config();
 
-	//Translator Output Enable conf and set it to 'enable'
-	prvSerialOE_Config();
-
 	//Set pins for communication with external chips
 	prvADC_GPIO_Config(); //i2c
 	prvPGA_GPIO_Config(); //spi
+
+	//Translator Output Enable conf and set it to 'enable'
+	prvSerialOE_Config();
 
 	// Configure LIS302 in order to produce data used for TIM4 reconfiguration and LED control
 //	prvMEMS_Config();
