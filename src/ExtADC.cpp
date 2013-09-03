@@ -106,6 +106,31 @@ void ExtADC::init(void)
 	return;
 }
 
+/**
+ * Configure ExtADC in specific mode
+ */
+void ExtADC::config(void)
+{
+	//TODO: make it possible to change parameters in runtime
+
+	I2CData config;
+	//control reg:
+	config.dir = DirWrite;
+	config.length = 3;
+	config.reg = EXTADC_REG_CTRL;
+	config.val[0] = EXTADC_BIT_V1_2_DIF; //differential measurement
+	config.val[1] = EXTADC_BIT_V7_8_T | EXTADC_BIT_V7_8_K; //temperature measurement in kelvin
+	config.val[2] = EXTADC_BIT_REPEAT | EXTADC_BIT_TINT_K; //repeat mode, tint in kelvin
+	process(config);
+
+	//enable channels:
+	config.dir = DirWrite;
+	config.length = 1;
+	config.reg = EXTADC_REG_CH_EN;
+	config.val[0] = EXTADC_CH_V1_2 | EXTADC_CH_V3_4 | EXTADC_CH_V5_6 | EXTADC_CH_T4; //TODO: Tint and Vcc
+	process(config);
+
+}
 bool ExtADC::process(I2CData& data)
 {
 	//TODO: finish implementation
@@ -260,5 +285,5 @@ void ExtADC::i2cRead(I2CData &data)
 		}
 	}
 
-	return 0;
+	return;
 }
