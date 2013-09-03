@@ -39,13 +39,13 @@ bool ExtADCTask::taskEntry()
 
 bool ExtADCTask::run(void *param)
 {
-	if (xQueueReceive(xQueue_I2CQuery,&xBuffer_receive,0) == pdPASS)
+	if (xQueueReceive(xQueue_I2CQuery, &xBuffer_receive, portMAX_DELAY) == pdPASS)
 	{
-		uint8_t receive;
-		if (extADC.process(xBuffer_receive, &receive)) //TODO: this may fail
+		I2CData receive;
+		if (extADC.process(xBuffer_receive, receive)) //TODO: this may fail
 		{
 			//receiver mode. send answer back
-			xQueueSend( xQueue_I2CRx, ( void * ) &receive, 0 );
+			xQueueSend(xQueue_I2CRx, (void * ) &receive, 0);
 		}
 	}
 	taskYIELD(); //task is going to ready state to allow next one to run

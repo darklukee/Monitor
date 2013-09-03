@@ -32,10 +32,13 @@ enum Dir
 	DirRead = !DirWrite
 };
 
+typedef uint8_t i2cBuff[4];
+
 struct I2CData
 {
 	uint8_t reg;
-	uint8_t val;
+	i2cBuff val;
+	uint8_t length;
 	Dir dir;
 };
 
@@ -47,11 +50,11 @@ public:
 	static void GPIO_Config(void);
 	void init(void);
 	void config(void);
-	bool process(I2CData data, uint8_t* retVal);
+	bool process(I2CData &data);
 
 private:
-	void i2cWrite(uint8_t reg, uint8_t value);
-	uint8_t i2cRead(uint8_t reg);
+	void i2cWrite(I2CData &data);
+	void i2cRead(I2CData &data);
 
 
 	static bool GPIO_Configured;
