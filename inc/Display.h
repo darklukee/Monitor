@@ -1,5 +1,5 @@
 /*
- * Global.h
+ * Display.h
  *
  *  Created on: 10 wrz 2013
  *      Author: lukee
@@ -20,47 +20,14 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 
-#ifndef GLOBAL_H_
-#define GLOBAL_H_
+#ifndef DISPLAY_H_
+#define DISPLAY_H_
 
-#include <stdint.h>
-#include "FreeRTOS.h"
-#include "semphr.h"
-
-enum GlobalSwitch
-{
-	//keep order with gsTable[]
-	eLcdMenu = 0,
-	eUsbPresent = 1
-};
-
-class Global
+class Display
 {
 public:
-	static Global& getInstance()
-	{
-		static Global instance;
-		return instance;
-	}
-	uint8_t getSwitch(GlobalSwitch gSwitch);
-	bool setSwitch(GlobalSwitch gSwitch, uint8_t value);
-
-private:
-	Global()
-	{
-		xMutex  = xSemaphoreCreateMutex();
-		gsLcdMenu = (uint8_t)false;
-		gsUsbPresent = (uint8_t)false;
-	}
-	Global(Global const&); // Don't Implement.
-	void operator=(Global const&); // Don't implement
-
-	//Mutex
-	xSemaphoreHandle xMutex;
-
-	// Switches
-	uint8_t gsLcdMenu;
-	uint8_t gsUsbPresent;
+	Display();
+	~Display();
 };
 
-#endif /* GLOBAL_H_ */
+#endif /* DISPLAY_H_ */

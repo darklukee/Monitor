@@ -4,7 +4,7 @@
 **  File        : stm32_flash.ld
 **
 **  Abstract    : Linker script for STM32F407VG Device with
-**                1024KByte FLASH, 192KByte RAM
+**                1024KByte FLASH, 128KByte RAM
 **
 **                Set heap size, stack size and stack location according
 **                to application requirements.
@@ -33,7 +33,7 @@
 ENTRY(Reset_Handler)
 
 /* Highest address of the user mode stack */
-_estack = 0x20020000;    /* end of 128K RAM on AHB bus*/
+_estack = 0x20020000;    /* end of 128K RAM */
 
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0;      /* required amount of heap  */
@@ -43,9 +43,12 @@ _Min_Stack_Size = 0x400; /* required amount of stack */
 MEMORY
 {
   FLASH (rx)      : ORIGIN = 0x08000000, LENGTH = 1024K
-  RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 192K
+  RAM (xrw)       : ORIGIN = 0x20000000, LENGTH = 128K
   MEMORY_B1 (rx)  : ORIGIN = 0x60000000, LENGTH = 0K
+  CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
 }
+
+_heap_end = ORIGIN(RAM1)+LENGTH(RAM1)-4;
 
 /* Define output sections */
 SECTIONS
@@ -68,7 +71,7 @@ SECTIONS
     *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
     *(.glue_7)         /* glue arm to thumb code */
     *(.glue_7t)        /* glue thumb to arm code */
-	*(.eh_frame)
+    *(.eh_frame)
 
     KEEP (*(.init))
     KEEP (*(.fini))
@@ -101,16 +104,16 @@ SECTIONS
   .fini_array :
   {
     PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP (*(.fini_array*))
     KEEP (*(SORT(.fini_array.*)))
+    KEEP (*(.fini_array*))
     PROVIDE_HIDDEN (__fini_array_end = .);
   } >FLASH
 
   /* used by the startup to initialize data */
-  _sidata = .;
+  _sidata = LOADADDR(.data);
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : AT ( _sidata )
+  .data : 
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -119,7 +122,26 @@ SECTIONS
 
     . = ALIGN(4);
     _edata = .;        /* define a global symbol at data end */
-  } >RAM
+  } >RAM AT> FLASH
+  
+  _siccmram = LOADADDR(.ccmram);
+
+  /* CCM-RAM section 
+  * 
+  * IMPORTANT NOTE! 
+  * If initialized variables will be placed in this section, 
+  * the startup code needs to be modified to copy the init-values.  
+  */
+  .ccmram :
+  {
+    . = ALIGN(4);
+    _sccmram = .;       /* create a global symbol at ccmram start */
+    *(.ccmram)
+    *(.ccmram*)
+    
+    . = ALIGN(4);
+    _eccmram = .;       /* create a global symbol at ccmram end */
+  } >CCMRAM AT> FLASH
 
   /* Uninitialized data section */
   . = ALIGN(4);
@@ -143,11 +165,13 @@ SECTIONS
     . = ALIGN(4);
     PROVIDE ( end = . );
     PROVIDE ( _end = . );
-    PROVIDE ( _heap_end = . ); /*TODO: check*/
     . = . + _Min_Heap_Size;
     . = . + _Min_Stack_Size;
     . = ALIGN(4);
   } >RAM
+  
+ 	__heap_end = _heap_end ;
+	PROVIDE (__heap_end = _heap_end);
 
   /* MEMORY_bank1 section, code must be located here explicitly            */
   /* Example: extern int foo(void) __attribute__ ((section (".mb1text"))); */

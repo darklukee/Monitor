@@ -20,6 +20,8 @@
  */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
+
 #include "stm32f4xx.h"
 
 /* FreeRTOS includes */
@@ -28,6 +30,7 @@
 #include "semphr.h"
 
 #include "hw_config.h"
+#include "Global.h"
 
 //#include "math.h"
 
@@ -39,16 +42,29 @@ xQueueHandle xQueue_I2CRx;
 //glcd
 xQueueHandle xQueue_Lcd;
 
-
+//Suppress linker errors. Exceptions handling disabled. Other option: add "-lstdc++" to linker
+__extension__ typedef int __guard __attribute__((mode (__DI__)));
+extern "C" int __cxa_atexit ( void (*f)(void *), void *p, void *d );
+extern "C" int __cxa_guard_acquire(__guard *);
+extern "C" void __cxa_guard_release (__guard *);
+extern "C" void __cxa_guard_abort (__guard *);
+extern "C" void __cxa_pure_virtual(void);
+int __cxa_guard_acquire(__guard *g) {return !*(char *)(g);};
+void __cxa_guard_release (__guard *g) {*(char *)g = 1;};
+void __cxa_guard_abort (__guard *) {};
+void __cxa_pure_virtual(void) {while(1);}
+int __cxa_atexit ( void (*f)(void *), void *p, void *d ){return 0;};
 
 int main(void)
 {
-
+//
+	Global &glob = Global::getInstance();
+	glob.setSwitch(eLcdMenu, (uint8_t) true);
+	printf("%f", 3.141592);
 	/* initialize hardware... */
 	prvSetupHardware();
 
 	/* Start the tasks  */
-
 
 	/* Start the scheduler. */
 	vTaskStartScheduler();

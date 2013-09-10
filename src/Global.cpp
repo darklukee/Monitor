@@ -26,7 +26,19 @@ uint8_t Global::getSwitch(GlobalSwitch gSwitch)
 {
 	if ( xSemaphoreTake( xMutex, ( portTickType ) 10 ) == pdTRUE)
 	{
-		uint8_t retVal = gsTable[gSwitch];
+		uint8_t retVal;
+		switch (gSwitch)
+		{
+		case eLcdMenu:
+			retVal = gsLcdMenu;
+			break;
+		case eUsbPresent:
+			retVal = gsUsbPresent;
+			break;
+		default:
+			retVal = 0xff;
+			break;
+		}
 		xSemaphoreGive(xMutex);
 		return retVal;
 	}
@@ -41,7 +53,17 @@ bool Global::setSwitch(GlobalSwitch gSwitch, uint8_t value)
 {
 	if ( xSemaphoreTake( xMutex, ( portTickType ) 10 ) == pdTRUE)
 	{
-		gsTable[gSwitch] = value;
+		switch (gSwitch)
+		{
+		case eLcdMenu:
+			gsLcdMenu = value;
+			break;
+		case eUsbPresent:
+			gsUsbPresent = value;
+			break;
+		default:
+			break;
+		}
 		xSemaphoreGive(xMutex);
 		return true;
 	}

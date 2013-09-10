@@ -46,6 +46,7 @@ bool ExtADCTask::run(void *param)
 		if (extADC.process(xBuffer_receive)) //TODO: this may fail
 		{
 			//receiver mode. send answer back
+			I2CData *receive; //TODO: stub, repair
 			xQueueSend(xQueue_I2CRx, (void * ) &receive, 0);
 		}
 	}

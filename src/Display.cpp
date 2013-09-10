@@ -1,5 +1,5 @@
 /*
- * Global.h
+ * Display.cpp
  *
  *  Created on: 10 wrz 2013
  *      Author: lukee
@@ -20,47 +20,17 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 
-#ifndef GLOBAL_H_
-#define GLOBAL_H_
+#include "Display.h"
+#include "Global.h"
 
-#include <stdint.h>
-#include "FreeRTOS.h"
-#include "semphr.h"
-
-enum GlobalSwitch
+Display::Display()
 {
-	//keep order with gsTable[]
-	eLcdMenu = 0,
-	eUsbPresent = 1
-};
+	// TODO Auto-generated constructor stub
 
-class Global
+}
+
+Display::~Display()
 {
-public:
-	static Global& getInstance()
-	{
-		static Global instance;
-		return instance;
-	}
-	uint8_t getSwitch(GlobalSwitch gSwitch);
-	bool setSwitch(GlobalSwitch gSwitch, uint8_t value);
+	// TODO Auto-generated destructor stub
+}
 
-private:
-	Global()
-	{
-		xMutex  = xSemaphoreCreateMutex();
-		gsLcdMenu = (uint8_t)false;
-		gsUsbPresent = (uint8_t)false;
-	}
-	Global(Global const&); // Don't Implement.
-	void operator=(Global const&); // Don't implement
-
-	//Mutex
-	xSemaphoreHandle xMutex;
-
-	// Switches
-	uint8_t gsLcdMenu;
-	uint8_t gsUsbPresent;
-};
-
-#endif /* GLOBAL_H_ */
