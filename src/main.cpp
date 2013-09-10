@@ -31,21 +31,14 @@
 
 //#include "math.h"
 
-/* Private typedef -----------------------------------------------------------*/
+// global queues
+//i2c
+xQueueHandle xQueue_I2CEvent;
+xQueueHandle xQueue_I2CQuery;
+xQueueHandle xQueue_I2CRx;
+//glcd
+xQueueHandle xQueue_Lcd;
 
-/* Private define ------------------------------------------------------------*/
-
-/* Private macro -------------------------------------------------------------*/
-
-/* Private functions ---------------------------------------------------------*/
-
-/* Task functions declarations */
-
-
-/* handlers to tasks to better control them */
-
-
-/* variables used by tasks */
 
 
 int main(void)
