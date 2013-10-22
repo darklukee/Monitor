@@ -48,7 +48,7 @@ MEMORY
   CCMRAM (rw)     : ORIGIN = 0x10000000, LENGTH = 64K
 }
 
-_heap_end = ORIGIN(RAM1)+LENGTH(RAM1)-4;
+_heap_end = ORIGIN(RAM)+LENGTH(RAM)-4;
 
 /* Define output sections */
 SECTIONS
