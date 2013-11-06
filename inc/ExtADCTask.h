@@ -30,7 +30,7 @@ class ExtADCTask: public scheduler_task
 {
 public:
 	ExtADCTask();
-	~ExtADCTask();
+//	~ExtADCTask();
 	bool init();
 	bool taskEntry();
 	bool run(void *param);

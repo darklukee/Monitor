@@ -23,13 +23,11 @@
 #ifndef EXTADC_H_
 #define EXTADC_H_
 
-#include <stdint.h>
-
+#include "stm32f4xx.h"
 
 enum Dir
 {
-	DirWrite = 0,
-	DirRead = !DirWrite
+	DirWrite = 0, DirRead = !DirWrite
 };
 
 typedef uint8_t i2cBuff[4];
@@ -56,25 +54,12 @@ private:
 	void i2cWrite(I2CData &data);
 	void i2cRead(I2CData &data);
 
-
 	static bool GPIO_Configured;
-	static const uint8_t addr = 0x90; //LTC2991 hardware address
+	static const uint8_t addr; //LTC2991 hardware address
 };
 
 //generic registers; use with length > 1
-#define EXTADC_REG_STAT	((uint8_t)0x00) // length = 2
-#define EXTADC_REG_CTRL	((uint8_t)0x06) //length = 4
-#define EXTADC_REG_V1		((uint8_t)0x0A) // length = 2
-#define EXTADC_REG_V2		((uint8_t)0x0C) // length = 2
-#define EXTADC_REG_V3		((uint8_t)0x0E) // length = 2
-#define EXTADC_REG_V4		((uint8_t)0x10) // length = 2
-#define EXTADC_REG_V5		((uint8_t)0x12) // length = 2
-#define EXTADC_REG_V6		((uint8_t)0x14) // length = 2
-#define EXTADC_REG_V7		((uint8_t)0x16) // length = 2
-#define EXTADC_REG_V8		((uint8_t)0x18) // length = 2
-#define EXTADC_REG_TINT		((uint8_t)0x0A) // length = 2
-#define EXTADC_REG_VCC		((uint8_t)0x0A) // length = 2
-
+#define EXTADC_REG_STAT	((uint8_t)0x00) // length = 2#define EXTADC_REG_CTRL	((uint8_t)0x06) //length = 4#define EXTADC_REG_V1		((uint8_t)0x0A) // length = 2#define EXTADC_REG_V2		((uint8_t)0x0C) // length = 2#define EXTADC_REG_V3		((uint8_t)0x0E) // length = 2#define EXTADC_REG_V4		((uint8_t)0x10) // length = 2#define EXTADC_REG_V5		((uint8_t)0x12) // length = 2#define EXTADC_REG_V6		((uint8_t)0x14) // length = 2#define EXTADC_REG_V7		((uint8_t)0x16) // length = 2#define EXTADC_REG_V8		((uint8_t)0x18) // length = 2#define EXTADC_REG_TINT		((uint8_t)0x0A) // length = 2#define EXTADC_REG_VCC		((uint8_t)0x0A) // length = 2
 //specific registers
 #define EXTADC_REG_STAT_LOW		((uint8_t)0x00)
 #define EXTADC_REG_STAT_HI		((uint8_t)0x01)

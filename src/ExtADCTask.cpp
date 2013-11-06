@@ -25,6 +25,11 @@
 extern xQueueHandle xQueue_I2CQuery;
 extern xQueueHandle xQueue_I2CRx;
 
+ExtADCTask::ExtADCTask() : scheduler_task("ExtADCTask", 1024, 1, NULL)
+{
+
+}
+
 bool ExtADCTask::init()
 {
 	extADC.init();

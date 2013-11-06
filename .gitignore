@@ -17,3 +17,4 @@
 
 # Include binary file
 !*.elf
+/Debug

@@ -27,6 +27,7 @@
 #include "queue.h"
 
 bool ExtADC::GPIO_Configured = false;
+const uint8_t ExtADC::addr = 0x90;
 
 extern xQueueHandle xQueue_I2CEvent;
 
@@ -66,7 +67,7 @@ void ExtADC::GPIO_Config(void)
 	GPIO_PinAFConfig(ADC_I2C_SCL_GPIO, ADC_I2C_SCL_PINSRC, ADC_I2C_GPIO_AF);
 	GPIO_PinAFConfig(ADC_I2C_SDA_GPIO, ADC_I2C_SDA_PINSRC, ADC_I2C_GPIO_AF);
 
-	ExtADC::GPIO_Configured = true;
+	GPIO_Configured = true;
 	return;
 }
 

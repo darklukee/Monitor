@@ -24,10 +24,11 @@
 #include "hw_config.h"
 #include "stm32f4xx_spi.h"
 
+bool PGA::GPIO_Configured = false;
+
 PGA::PGA()
 {
 	// TODO Auto-generated constructor stub
-	GPIO_Configured = false;
 }
 
 PGA::~PGA()
@@ -38,5 +39,5 @@ PGA::~PGA()
 void PGA::GPIO_Config(void)
 {
 	//TODO: implement me!
-	//GPIO_Configured = true;
+	GPIO_Configured = true;
 }

@@ -23,7 +23,8 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
-#include <stdint.h>
+#include "stm32f4xx.h"
+
 #include "FreeRTOS.h"
 #include "semphr.h"
 
@@ -48,9 +49,9 @@ public:
 private:
 	Global()
 	{
-		xMutex  = xSemaphoreCreateMutex();
-		gsLcdMenu = (uint8_t)false;
-		gsUsbPresent = (uint8_t)false;
+		xMutex = xSemaphoreCreateMutex();
+		gsLcdMenu = (uint8_t) false;
+		gsUsbPresent = (uint8_t) false;
 	}
 	Global(Global const&); // Don't Implement.
 	void operator=(Global const&); // Don't implement
