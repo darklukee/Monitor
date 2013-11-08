@@ -31,11 +31,15 @@
 
 #include <stdio.h> //printf//#include "math.h"
 
+//cpp_wrapper
+#include <cpp_task.hpp>
+
 //debugger crash test TODO: check if necessary
 #include "Global.h"
 #include "ExtADC.h"
 #include "ExtADCTask.h"
 #include "Display.h"
+#include "TestTask.h"
 
 // global queues
 //i2c
@@ -44,6 +48,8 @@ xQueueHandle xQueue_I2CQuery;
 xQueueHandle xQueue_I2CRx;
 //glcd
 xQueueHandle xQueue_Lcd;
+
+
 
 int main(void)
 {
@@ -68,15 +74,12 @@ int main(void)
 	prvSetupHardware();
 
 	/* Start the tasks  */
+	scheduler_add_task(new TestTask());
 
 	/* Start the scheduler. */
-	vTaskStartScheduler();
+	//vTaskStartScheduler();
+	scheduler_start(false);
 
-	int i;
-	while(true)
-	{
-		i++;
-	}
 	/* Will only get here if there was not enough heap space to create the idle task. */
 	return 0;
 }
