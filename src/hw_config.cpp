@@ -24,7 +24,7 @@ void prvSetupHardware(void)
 	prvLED_Config(GPIO);
 	// Configure User button pin (PA0) as external interrupt -> modes switching
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_EXTI);
-
+/*
 	// LCD pin init
 	prvLCD_Config();
 	// Initialize LCD LED PWM. Timer initialization included
@@ -39,7 +39,7 @@ void prvSetupHardware(void)
 
 	//Translator Output Enable conf and set it to 'enable'
 	prvSerialOE_Config();
-
+*/
 	// Configure LIS302 in order to produce data used for TIM4 reconfiguration and LED control
 //	prvMEMS_Config();
 }
