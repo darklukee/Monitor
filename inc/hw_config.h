@@ -28,12 +28,13 @@ void prvADC_GPIO_Config(void);
 void prvPGA_GPIO_Config(void);
 
 //Keyboard key macros
+//Keep in sync with stm32f4xx_it.c !!!
 #define KEYn 6
 
 #define KEY_UP_PIN GPIO_Pin_4
 #define KEY_UP_GPIO_PORT GPIOE
 #define KEY_UP_GPIO_CLK RCC_AHB1Periph_GPIOE
-#define KEY_UP_EXTI_LINE EXTI_Line5
+#define KEY_UP_EXTI_LINE EXTI_Line9
 #define KEY_UP_EXTI_PORT_SOURCE EXTI_PortSourceGPIOE
 #define KEY_UP_EXTI_PIN_SOURCE EXTI_PinSource4
 #define KEY_UP_EXTI_IRQn EXTI9_5_IRQn

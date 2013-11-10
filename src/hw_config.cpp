@@ -24,7 +24,7 @@ void prvSetupHardware(void)
 	prvLED_Config(GPIO);
 	// Configure User button pin (PA0) as external interrupt -> modes switching
 	STM_EVAL_PBInit(BUTTON_USER, BUTTON_MODE_EXTI);
-/*
+
 	// LCD pin init
 	prvLCD_Config();
 	// Initialize LCD LED PWM. Timer initialization included
@@ -32,7 +32,7 @@ void prvSetupHardware(void)
 
 	// Keyboard init with interupts
 	prvKeyboard_Config();
-
+/*
 	//Set pins for communication with external chips
 	prvADC_GPIO_Config(); //i2c
 	prvPGA_GPIO_Config(); //spi
