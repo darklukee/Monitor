@@ -9,6 +9,7 @@
 #include "hw_config.h"
 //#include "glcd_Config.h"
 #include "include/glcd_io.h"
+//#include "glcd.h"
 #include "ExtADC.h"
 #include "PGA.h"
 
@@ -87,7 +88,7 @@ void prvLCDLED_Config(void)
 	// Configure PC6
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_25MHz; //Timer b�dzie pracowa� na poziomie kHz
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz; //Timer b�dzie pracowa� na poziomie kHz
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF; //Timer
 	GPIO_Init(GPIOC, &GPIO_InitStructure);
@@ -317,7 +318,8 @@ void prvTIM3_Config(void)
 	 ----------------------------------------------------------------------- */
 
 	/* Compute the prescaler value */
-	PrescalerValue = (uint16_t) ((SystemCoreClock / 2) / 2000000) - 1; //TIM3 counter clock at 2 MHz
+	const uint32_t counterFreq = 2000000;
+	PrescalerValue = (uint16_t) ((SystemCoreClock / 2) / counterFreq) - 1; //TIM3 counter clock at 2 MHz, PWM clock at 1kHz
 
 	/* Time base configuration */
 	TIM_TimeBaseStructure.TIM_Period = TIM_ARR;
@@ -325,9 +327,6 @@ void prvTIM3_Config(void)
 	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
 	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
 	TIM_TimeBaseInit(TIM3, &TIM_TimeBaseStructure);
-
-	/* Enable TIM4 Preload register on ARR */
-	TIM_ARRPreloadConfig(TIM3, ENABLE);
 
 	/* TIM PWM1 Mode configuration: Channel */
 	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM1;
@@ -337,9 +336,17 @@ void prvTIM3_Config(void)
 
 	/* Output Compare PWM1 Mode configuration: Channel1 */
 	TIM_OC1Init(TIM3, &TIM_OCInitStructure);
-	TIM_CCxCmd(TIM3, TIM_Channel_1, DISABLE);
-
+	//TIM_CCxCmd(TIM3, TIM_Channel_1, DISABLE);
 	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
+
+	//TIM_CCxCmd(TIM3, TIM_Channel_1, ENABLE);
+	int duty =10; //%
+	TIM_SetCompare1(TIM3, TIM_CCR + (TIM_ARR*duty/100));
+
+	/* Enable TIM3 Preload register on ARR */
+	TIM_ARRPreloadConfig(TIM3, ENABLE);
+
+	TIM_Cmd(TIM3, ENABLE);
 }
 
 //void prvMEMS_Config(void)

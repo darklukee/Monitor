@@ -39,7 +39,9 @@
 #include "ExtADC.h"
 #include "ExtADCTask.h"
 #include "Display.h"
+
 #include "TestTask.h"
+#include "DisplayTask.h"
 
 // global queues
 //i2c
@@ -75,11 +77,13 @@ int main(void)
 
 	/* Start the tasks  */
 	scheduler_add_task(new TestTask());
+	scheduler_add_task(new DisplayTask());
 
 	/* Start the scheduler. */
 	//vTaskStartScheduler();
 	scheduler_start(false);
 
+	//no point in deleting Tasks
 	/* Will only get here if there was not enough heap space to create the idle task. */
 	return 0;
 }
