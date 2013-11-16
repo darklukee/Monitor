@@ -47,7 +47,7 @@ bool TestTask::run(void *param)
 {
 	int *LED = (int *) param;
 	STM_EVAL_LEDToggle((Led_TypeDef) LED[0]);
-	vTaskDelay(OS_MS(LED[1]));
+	vTaskDelay(OS_MS(LED[1]/2));
 
 	return true;
 }

@@ -42,6 +42,7 @@ bool DisplayTask::taskEntry()
 //	lcd.CursorTo(0,0);
 //	lcd.SelectFont(SystemFont5x7);
 
+//	GLCD.Init(INVERTED);
 	GLCD.Init();
 	GLCD.ClearScreen();
 	GLCD.CursorTo(0,0);
@@ -51,31 +52,24 @@ bool DisplayTask::taskEntry()
 
 bool DisplayTask::run(void *param)
 {
-	char hello[] = "Hello World";
-//	if (toggle)
-//	{
-//		lcd.SetFontColor(BLACK);
-//		lcd.DrawCircle(32,32,10,BLACK);
-//	}
-//	else
-//	{
-//		lcd.SetFontColor(WHITE);
-//		lcd.DrawCircle(42,42,10,WHITE);
-//	}
-//	toggle ^= true;
-//	//lcd.Puts(hello);
+//	char hello[] = "Hello World";
+	GLCD.DrawCircle(10,10,5);
 	if (toggle)
 	{
-		GLCD.SetFontColor(BLACK);
-		GLCD.DrawCircle(32,32,10,BLACK);
+//		GLCD.SetFontColor(BLACK);
+		GLCD.DrawCircle(64,64,10,BLACK);
+		GLCD.SetDot(55,55,BLACK);
 	}
 	else
 	{
-		GLCD.SetFontColor(WHITE);
-		GLCD.DrawCircle(42,42,10,WHITE);
+//		GLCD.SetFontColor(WHITE);
+		GLCD.DrawCircle(64,64,10,WHITE);
+		GLCD.SetDot(55,55,WHITE);
 	}
 	toggle ^= true;
 	//GLCD.Puts(hello);
-	vTaskDelay(OS_MS(1000));
+	vTaskDelay(OS_MS(500));
+
+//	vTaskSuspend(this->getTaskHandle());
 	return true;
 }

@@ -340,7 +340,7 @@ void prvTIM3_Config(void)
 	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
 	//TIM_CCxCmd(TIM3, TIM_Channel_1, ENABLE);
-	int duty =10; //%
+	int duty =20; //%
 	TIM_SetCompare1(TIM3, TIM_CCR + (TIM_ARR*duty/100));
 
 	/* Enable TIM3 Preload register on ARR */
