@@ -165,6 +165,7 @@ void EXTI0_IRQHandler(void)
 	//TODO: stub
 	if (EXTI_GetITStatus(EXTI_Line0) != RESET)
 	{
+		EXTI_ClearITPendingBit(EXTI_Line0);
 	}
 }
 
@@ -178,6 +179,7 @@ void EXTI3_IRQHandler(void)
 	//TODO: stub
 	if(EXTI_GetITStatus(KEY_OK_EXTI_LINE) != RESET)
   {
+		EXTI_ClearITPendingBit(KEY_OK_EXTI_LINE);
   }
 }
 
@@ -191,6 +193,7 @@ void EXTI4_IRQHandler(void)
 	//TODO: stub
 	if(EXTI_GetITStatus(KEY_ESC_EXTI_LINE) != RESET)
   {
+		EXTI_ClearITPendingBit(KEY_ESC_EXTI_LINE);
   }
 }
 
@@ -205,18 +208,23 @@ void EXTI9_5_IRQHandler(void)
 	if(EXTI_GetITStatus(EXTI_Line5) != RESET)
   {
 		//DO NOT use, something is wrong here
+		EXTI_ClearITPendingBit(EXTI_Line5);
   }
 	if(EXTI_GetITStatus(KEY_UP_EXTI_LINE) != RESET)
   {
+		EXTI_ClearITPendingBit(KEY_UP_EXTI_LINE);
   }
 	if(EXTI_GetITStatus(KEY_DOWN_EXTI_LINE) != RESET)
   {
+		EXTI_ClearITPendingBit(KEY_DOWN_EXTI_LINE);
   }
 	if(EXTI_GetITStatus(KEY_LEFT_EXTI_LINE) != RESET)
   {
+		EXTI_ClearITPendingBit(KEY_LEFT_EXTI_LINE);
   }
 	if(EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
   {
+		EXTI_ClearITPendingBit(KEY_RIGHT_EXTI_LINE);
   }
 }
 
