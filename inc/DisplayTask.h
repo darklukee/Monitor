@@ -23,7 +23,7 @@
 #define DISPLAYTASK_H_
 
 #include <cpp_task.hpp>
-//#include "glcd.h"
+#include "glcd.h"
 
 class DisplayTask: public scheduler_task
 {
@@ -33,8 +33,9 @@ public:
 	bool taskEntry();
 	bool run(void *param);
 private:
-//	glcd lcd;
+	glcd GLCD;
 	bool toggle;
+	void Demo();
 };
 
 #endif /* DISPLAYTASK_H_ */

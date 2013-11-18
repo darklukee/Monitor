@@ -23,7 +23,8 @@
 #include "glcd.h"
 #include "fonts/SystemFont5x7.h"
 
-DisplayTask::DisplayTask() : scheduler_task("DisplayTask", 1024*10, 1, NULL)
+DisplayTask::DisplayTask() :
+	scheduler_task("DisplayTask", 1024 * 10, 1, NULL)
 {
 	// TODO Auto-generated constructor stub
 	toggle = false;
@@ -37,39 +38,59 @@ bool DisplayTask::init()
 
 bool DisplayTask::taskEntry()
 {
-//	lcd.Init();
-//	lcd.ClearScreen();
-//	lcd.CursorTo(0,0);
-//	lcd.SelectFont(SystemFont5x7);
-
+	this->setFrequency(500); //500ms
 //	GLCD.Init(INVERTED);
 	GLCD.Init();
 	GLCD.ClearScreen();
-	GLCD.CursorTo(0,0);
+//	GLCD.CursorTo(0,0);
 	GLCD.SelectFont(SystemFont5x7);
+//	GLCD.DefineArea(0,0,127,63);
 	return true;
 }
 
 bool DisplayTask::run(void *param)
 {
-//	char hello[] = "Hello World";
-	GLCD.DrawCircle(10,10,5);
+
+	Demo();
+
+//	vTaskSuspend(this->getTaskHandle());
+	return true;
+}
+
+void DisplayTask::Demo()
+{
+	char hello[] = "Hello World";
+	static unsigned int i;
+	i++;
+	if(i>=8)
+	{
+		GLCD.ClearScreen();
+	}
+	i %= 8;
+	//GLCD.DrawCircle(10,10,5);
 	if (toggle)
 	{
-//		GLCD.SetFontColor(BLACK);
-		GLCD.DrawCircle(64,64,10,BLACK);
-		GLCD.SetDot(55,55,BLACK);
+		GLCD.SetFontColor(BLACK);
+		GLCD.CursorTo(i,i);
+		GLCD.Puts(hello);
+//		GLCD.PutChar('c');
+//		GLCD.DrawCircle(100,20,10,BLACK);
+//		GLCD.SetDot(55,55,BLACK);
+//		GLCD.DrawString(hello, 5, 5);
+
 	}
 	else
 	{
 //		GLCD.SetFontColor(WHITE);
-		GLCD.DrawCircle(64,64,10,WHITE);
-		GLCD.SetDot(55,55,WHITE);
+//		GLCD.CursorTo(i,i);
+//		GLCD.PutChar('d');
+//		GLCD.DrawCircle(100,20,10,WHITE);
+//		GLCD.SetDot(55,55,WHITE);
+//		GLCD.DrawString(hello, 5, 5);
+		float pi = 3.141592;
+		char pi_char[15];
+		sprintf(pi_char, " float %.3f, int %d", pi, i);
+		GLCD.Puts(pi_char);
 	}
 	toggle ^= true;
-	//GLCD.Puts(hello);
-	vTaskDelay(OS_MS(500));
-
-//	vTaskSuspend(this->getTaskHandle());
-	return true;
 }
