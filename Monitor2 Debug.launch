@@ -15,7 +15,7 @@
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.runCommands" value="monitor soft_reset_halt&#13;&#10;continue"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setPcRegister" value="false"/>
 <booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setResume" value="false"/>
-<booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setStopAt" value="true"/>
+<booleanAttribute key="org.eclipse.cdt.debug.gdbjtag.core.setStopAt" value="false"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.stopAt" value="main"/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.symbolsFileName" value=""/>
 <stringAttribute key="org.eclipse.cdt.debug.gdbjtag.core.symbolsOffset" value=""/>
@@ -32,17 +32,20 @@
 <intAttribute key="org.eclipse.cdt.launch.ATTR_BUILD_BEFORE_LAUNCH_ATTR" value="2"/>
 <stringAttribute key="org.eclipse.cdt.launch.COREFILE_PATH" value=""/>
 <stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_REGISTER_GROUPS" value=""/>
-<stringAttribute key="org.eclipse.cdt.launch.FORMAT" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&lt;contentList/&gt;"/>
+<stringAttribute key="org.eclipse.cdt.launch.FORMAT" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&lt;contentList&gt;&lt;content id=&quot;status-glcd_Device::Init-(format)&quot; val=&quot;4&quot;/&gt;&lt;content id=&quot;data-ARMio_WriteByte-(format)&quot; val=&quot;4&quot;/&gt;&lt;/contentList&gt;"/>
 <stringAttribute key="org.eclipse.cdt.launch.GLOBAL_VARIABLES" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;globalVariableList/&gt;&#13;&#10;"/>
-<stringAttribute key="org.eclipse.cdt.launch.MEMORY_BLOCKS" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;memoryBlockExpressionList/&gt;&#13;&#10;"/>
+<stringAttribute key="org.eclipse.cdt.launch.MEMORY_BLOCKS" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; standalone=&quot;no&quot;?&gt;&#13;&#10;&lt;memoryBlockExpressionList&gt;&#13;&#10;&lt;memoryBlockExpressionItem&gt;&#13;&#10;&lt;expression text=&quot;0x20000000&quot;/&gt;&#13;&#10;&lt;/memoryBlockExpressionItem&gt;&#13;&#10;&lt;/memoryBlockExpressionList&gt;&#13;&#10;"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="Debug\Monitor2.elf"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="Monitor2"/>
-<booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="true"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.2111213064"/>
+<booleanAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_AUTO_ATTR" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
 <listEntry value="/Monitor2"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.ui.favoriteGroups">
+<listEntry value="org.eclipse.debug.ui.launchGroup.debug"/>
 </listAttribute>
 </launchConfiguration>

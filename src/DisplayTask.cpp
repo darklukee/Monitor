@@ -24,7 +24,7 @@
 #include "fonts/SystemFont5x7.h"
 
 DisplayTask::DisplayTask() :
-	scheduler_task("DisplayTask", 1024 * 10, 1, NULL)
+	scheduler_task("DisplayTask", 1024 * 10, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
 	toggle = false;

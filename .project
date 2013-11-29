@@ -112,5 +112,20 @@
 			<type>2</type>
 			<locationURI>WORKSPACE_LOC/common/STM32F4xx_StdPeriph_Driver/src</locationURI>
 		</link>
+		<link>
+			<name>STM32_USB_HOST_Library</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/common/STM32_USB_HOST_Library</locationURI>
+		</link>
+		<link>
+			<name>STM32_USB_OTG_Driver</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/common/STM32_USB_OTG_Driver</locationURI>
+		</link>
+		<link>
+			<name>fat_fs</name>
+			<type>2</type>
+			<locationURI>WORKSPACE_LOC/common/fat_fs</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

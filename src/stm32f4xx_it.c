@@ -31,12 +31,22 @@
 
 #include "hw_config.h"
 
+#include "usb_hcd_int.h"
+#include "usb_bsp.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 portBASE_TYPE xHigherPriorityTaskWoken;
 extern xQueueHandle xQueue_I2CEvent;
+
+//USB
+uint16_t capture = 0;
+extern __IO uint16_t CCR_Val;
+__IO uint8_t LED_Toggle = 0;
+extern USB_OTG_CORE_HANDLE USB_OTG_Core;
+//extern USBH_HOST USB_Host;
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -177,10 +187,10 @@ void EXTI0_IRQHandler(void)
 void EXTI3_IRQHandler(void)
 {
 	//TODO: stub
-	if(EXTI_GetITStatus(KEY_OK_EXTI_LINE) != RESET)
-  {
+	if (EXTI_GetITStatus(KEY_OK_EXTI_LINE) != RESET)
+	{
 		EXTI_ClearITPendingBit(KEY_OK_EXTI_LINE);
-  }
+	}
 }
 
 /**
@@ -191,10 +201,10 @@ void EXTI3_IRQHandler(void)
 void EXTI4_IRQHandler(void)
 {
 	//TODO: stub
-	if(EXTI_GetITStatus(KEY_ESC_EXTI_LINE) != RESET)
-  {
+	if (EXTI_GetITStatus(KEY_ESC_EXTI_LINE) != RESET)
+	{
 		EXTI_ClearITPendingBit(KEY_ESC_EXTI_LINE);
-  }
+	}
 }
 
 /**
@@ -205,27 +215,27 @@ void EXTI4_IRQHandler(void)
 void EXTI9_5_IRQHandler(void)
 {
 	//TODO: stub
-	if(EXTI_GetITStatus(EXTI_Line5) != RESET)
-  {
+	if (EXTI_GetITStatus(EXTI_Line5) != RESET)
+	{
 		//DO NOT use, something is wrong here
 		EXTI_ClearITPendingBit(EXTI_Line5);
-  }
-	if(EXTI_GetITStatus(KEY_UP_EXTI_LINE) != RESET)
-  {
+	}
+	if (EXTI_GetITStatus(KEY_UP_EXTI_LINE) != RESET)
+	{
 		EXTI_ClearITPendingBit(KEY_UP_EXTI_LINE);
-  }
-	if(EXTI_GetITStatus(KEY_DOWN_EXTI_LINE) != RESET)
-  {
+	}
+	if (EXTI_GetITStatus(KEY_DOWN_EXTI_LINE) != RESET)
+	{
 		EXTI_ClearITPendingBit(KEY_DOWN_EXTI_LINE);
-  }
-	if(EXTI_GetITStatus(KEY_LEFT_EXTI_LINE) != RESET)
-  {
+	}
+	if (EXTI_GetITStatus(KEY_LEFT_EXTI_LINE) != RESET)
+	{
 		EXTI_ClearITPendingBit(KEY_LEFT_EXTI_LINE);
-  }
-	if(EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
-  {
+	}
+	if (EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
+	{
 		EXTI_ClearITPendingBit(KEY_RIGHT_EXTI_LINE);
-  }
+	}
 }
 
 void I2C3_ER_IRQHandler(void)
@@ -241,11 +251,82 @@ void I2C3_EV_IRQHandler(void)
 	//
 	//if (EXTI_GetITStatus(EXTI_Line0) != RESET) //FIXME: wrong EXTI_Line
 	//{
-		//xSemaphoreGiveFromISR(xSemaphoreSW,&xHigherPriorityTaskWoken);
-		xQueueSendFromISR(xQueue_I2CEvent, I2C_GetLastEvent(I2C3), &xHigherPriorityTaskWoken); //TODO poiter, references of sth
+	//xSemaphoreGiveFromISR(xSemaphoreSW,&xHigherPriorityTaskWoken);
+	xQueueSendFromISR(xQueue_I2CEvent, I2C_GetLastEvent(I2C3), &xHigherPriorityTaskWoken); //TODO poiter, references of sth
 
-		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+	portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	//}
+}
+
+/**
+ * @brief  This function handles TIM2 global interrupt request.
+ * @param  None
+ * @retval None
+ */
+void TIM2_IRQHandler(void)
+{
+	USB_OTG_BSP_TimerIRQ();
+}
+
+/**
+ * @brief  This function handles USB-On-The-Go FS global interrupt request.
+ * @param  None
+ * @retval None
+ */
+void OTG_FS_IRQHandler(void)
+{
+	USBH_OTG_ISR_Handler(&USB_OTG_Core);
+}
+
+/**
+ * @brief  This function handles TIM4 global interrupt request.
+ * @param  None
+ * @retval None
+ */
+void TIM4_IRQHandler(void)
+{
+
+	/* Checks whether the TIM interrupt has occurred */
+	if (TIM_GetITStatus(TIM4, TIM_IT_CC1) != RESET)
+	{
+		TIM_ClearITPendingBit(TIM4, TIM_IT_CC1);
+		if (LED_Toggle == 3)
+		{
+			/* LED3 Orange toggling */
+			STM_EVAL_LEDToggle(LED3);
+			STM_EVAL_LEDOff(LED6);
+			STM_EVAL_LEDOff(LED4);
+		}
+		else if (LED_Toggle == 4)
+		{
+			/* LED4 Green toggling */
+			STM_EVAL_LEDToggle(LED4);
+			STM_EVAL_LEDOff(LED6);
+			STM_EVAL_LEDOff(LED3);
+		}
+		else if (LED_Toggle == 6)
+		{
+			/* LED6 Blue toggling */
+			STM_EVAL_LEDOff(LED3);
+			STM_EVAL_LEDOff(LED4);
+			STM_EVAL_LEDToggle(LED6);
+		}
+		else if (LED_Toggle == 0)
+		{
+			/* LED6 Blue On to signal Pause */
+			STM_EVAL_LEDOn(LED6);
+		}
+		else if (LED_Toggle == 7)
+		{
+			/* LED4 toggling with frequency = 439.4 Hz */
+			STM_EVAL_LEDOff(LED3);
+			STM_EVAL_LEDOff(LED4);
+			STM_EVAL_LEDOff(LED5);
+			STM_EVAL_LEDOff(LED6);
+		}
+		capture = TIM_GetCapture1(TIM4);
+		TIM_SetCompare1(TIM4, capture + CCR_Val);
+	}
 }
 
 /******************* (C) COPYRIGHT 2011 STMicroelectronics *****END OF FILE****/
