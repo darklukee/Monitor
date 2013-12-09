@@ -44,6 +44,7 @@
 #include "DisplayTask.h"
 #include "LcdPinTestTask.h"
 #include "UsbTask.h"
+#include "UsbHostTask.h"
 
 // global queues
 //i2c
@@ -82,6 +83,7 @@ int main(void)
 	scheduler_add_task(new DisplayTask());
 //	scheduler_add_task(new LcdPinTestTask());
 	scheduler_add_task(new UsbTask());
+	scheduler_add_task(new UsbHostTask());
 
 	/* Start the scheduler. */
 	//vTaskStartScheduler();

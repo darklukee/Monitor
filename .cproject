@@ -40,7 +40,7 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.1092612190" name="Remove command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm" value="rm" valueType="string"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash.926474420" name="Create flash image" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash" value="false" valueType="boolean"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createlisting.1519447229" name="Create extended listing" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createlisting" value="false" valueType="boolean"/>
-							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.1672871868" name="Print size" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize" value="false" valueType="boolean"/>
+							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.1672871868" name="Print size" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize" value="true" valueType="boolean"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.toolchain.path.1573073870" name="Path" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.toolchain.path" value="C:\dev\GNU Tools ARM Embedded\4.7 2013q3" valueType="string"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.1985748014" name="Float ABI" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.abi.softfp" valueType="enumerated"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.1763092236" name="FPU Type" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit" value="ilg.gnuarmeclipse.managedbuild.cross.option.arm.target.fpu.unit.fpv4spd16" valueType="enumerated"/>
@@ -57,6 +57,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/common/STM32_USB_HOST_Library/Core/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/common/STM32_USB_HOST_Library/Class/MSC/inc}&quot;"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.2042796804" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
+								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.157073429" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1783860365" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
@@ -66,6 +69,7 @@
 									<listOptionValue builtIn="false" value="USE_USB_OTG_FS"/>
 									<listOptionValue builtIn="false" value="__FPU_PRESENT"/>
 									<listOptionValue builtIn="false" value="__FPU_USED"/>
+									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.includepaths.122785407" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.includepaths"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.776644321" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" valueType="includePath">
@@ -92,6 +96,7 @@
 									<listOptionValue builtIn="false" value="USE_USB_OTG_FS"/>
 									<listOptionValue builtIn="false" value="__FPU_PRESENT"/>
 									<listOptionValue builtIn="false" value="__FPU_USED"/>
+									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.includepaths.1231279529" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.includepaths"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths.1621416585" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.include.paths" valueType="includePath">
@@ -157,7 +162,7 @@
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="FreeRTOS_cpp_wrapper"/>
 						<entry excluding="stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="STM32F4-Discovery"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="STM32F4xx"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="STM32F4xx_StdPeriph_Driver"/>
+						<entry excluding="stm32f4xx_usart.c|stm32f4xx_rng.c|stm32f4xx_ltdc.c|stm32f4xx_fsmc.c|stm32f4xx_dma2d.c|stm32f4xx_dcmi.c|stm32f4xx_sai.c|stm32f4xx_hash.c|stm32f4xx_hash_sha1.c|stm32f4xx_hash_md5.c|stm32f4xx_fmc.c|stm32f4xx_dac.c|stm32f4xx_cryp.c|stm32f4xx_cryp_tdes.c|stm32f4xx_cryp_des.c|stm32f4xx_cryp_aes.c|stm32f4xx_crc.c|stm32f4xx_can.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="STM32F4xx_StdPeriph_Driver"/>
 						<entry excluding="Class/HID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STM32_USB_HOST_Library"/>
 						<entry excluding="src/usb_otg.c|src/usb_dcd.c|src/usb_dcd_int.c|src/usb_bsp_template.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STM32_USB_OTG_Driver"/>
 						<entry excluding="src/diskio.c|src/option/syncobj.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="fat_fs"/>
@@ -220,6 +225,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Monitor2/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1075455736" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
+								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.1559999750" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.2053156025" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
@@ -232,6 +240,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Monitor2/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1305199882" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
+								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.2125135272" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.1010503618" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler">
@@ -243,6 +254,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/common/STM32_USB_HOST_Library/Class/MSC/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Monitor2/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
+								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs.1929491310" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.input.1168286953" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.input"/>
 							</tool>
@@ -280,7 +294,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="STM32_USB_OTG_Driver/src/usb_otg.c|STM32_USB_OTG_Driver/src/usb_dcd.c|STM32_USB_OTG_Driver/src/usb_dcd_int.c|STM32_USB_OTG_Driver/src/usb_bsp_template.c|STM32_USB_HOST_Library/Class/HID|fat_fs/src/diskio.c|fat_fs/src/option/syncobj.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_wwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_usart.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sdio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_rng.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_iwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_sha1.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_md5.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fsmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dcmi.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_tdes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_des.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_aes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_crc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_can.c|STM32F4-Discovery/stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="STM32F4xx_StdPeriph_Driver/stm32f4xx_ltdc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dma2d.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sai.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dac.c|STM32_USB_OTG_Driver/src/usb_otg.c|STM32_USB_OTG_Driver/src/usb_dcd.c|STM32_USB_OTG_Driver/src/usb_dcd_int.c|STM32_USB_OTG_Driver/src/usb_bsp_template.c|STM32_USB_HOST_Library/Class/HID|fat_fs/src/diskio.c|fat_fs/src/option/syncobj.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_wwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_usart.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sdio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_rng.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_iwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_sha1.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_md5.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fsmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dcmi.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_tdes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_des.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_aes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_crc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_can.c|STM32F4-Discovery/stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

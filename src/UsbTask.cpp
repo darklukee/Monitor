@@ -20,17 +20,11 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 #include <UsbTask.h>
+#include <stdio.h>
 #include "usbh_usr.h"
-#include "stm32f4_discovery.h"
-
-extern __IO uint8_t LED_Toggle;
-__IO uint8_t RepeatState = 0;
-__IO uint16_t CCR_Val = 16826;
-USB_OTG_CORE_HANDLE USB_OTG_Core;
-USBH_HOST USB_Host;
 
 UsbTask::UsbTask() :
-	scheduler_task("UsbTask", 1024*10, PRIORITY_MEDIUM, NULL)
+	scheduler_task("UsbTask", 1024 * 10, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
 	iter = 0;
@@ -38,20 +32,11 @@ UsbTask::UsbTask() :
 
 bool UsbTask::init()
 {
-	STM_EVAL_LEDOn(LED4);
-	TIM_LED_Config();
-	LED_Toggle = 7;
 	return true;
 }
 
 bool UsbTask::taskEntry()
 {
-	/* Init Host Library */
-	USBH_Init(&USB_OTG_Core,
-		USB_OTG_FS_CORE_ID,
-		&USB_Host,
-		&USBH_MSC_cb,
-		&USR_Callbacks);
 	return true;
 }
 
@@ -59,68 +44,8 @@ bool UsbTask::run(void *param)
 {
 	char folderName[] = "lukee";
 	char buf[20] = "";
-
-	USBH_Process(&USB_OTG_Core, &USB_Host);
-	iter++;
-	if (iter % 50 == 0)
-	{
-		sprintf(buf, "%s_%d", folderName, iter);
-		f_mkdir(buf);
-	}
-	vTaskDelay(OS_MS(10));
+	sprintf(buf, "%s_%03d", folderName, iter++);
+	f_mkdir(buf);
+	vTaskDelay(OS_MS(5000));
 	return true;
-}
-
-void UsbTask::TIM_LED_Config(void)
-{
-	TIM_OCInitTypeDef TIM_OCInitStructure;
-	TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure;
-	NVIC_InitTypeDef NVIC_InitStructure;
-	uint16_t prescalervalue = 0;
-
-	/* TIM4 clock enable */
-	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
-
-	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-
-	/* Enable the TIM3 gloabal Interrupt */
-	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-
-	/* Initialize Leds mounted on STM324F4-EVAL board */
-	STM_EVAL_LEDInit(LED3);
-	STM_EVAL_LEDInit(LED4);
-	STM_EVAL_LEDInit(LED6);
-
-	/* Compute the prescaler value */
-	prescalervalue = (uint16_t) ((SystemCoreClock) / 550000) - 1;
-
-	/* Time base configuration */
-	TIM_TimeBaseStructure.TIM_Period = 65535;
-	TIM_TimeBaseStructure.TIM_Prescaler = prescalervalue;
-	TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-	TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM4, &TIM_TimeBaseStructure);
-
-	/* Enable TIM4 Preload register on ARR */
-	TIM_ARRPreloadConfig(TIM4, ENABLE);
-
-	/* TIM PWM1 Mode configuration: Channel */
-	TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Timing;
-	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
-	TIM_OCInitStructure.TIM_Pulse = CCR_Val;
-	TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
-
-	/* Output Compare PWM1 Mode configuration: Channel2 */
-	TIM_OC1Init(TIM4, &TIM_OCInitStructure);
-	TIM_OC1PreloadConfig(TIM4, TIM_OCPreload_Disable);
-
-	/* TIM Interrupts enable */
-	TIM_ITConfig(TIM4, TIM_IT_CC1, ENABLE);
-
-	/* TIM4 enable counter */
-	TIM_Cmd(TIM4, ENABLE);
 }

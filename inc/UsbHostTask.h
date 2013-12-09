@@ -1,7 +1,7 @@
 /*
- * UsbTask.h
+ * UsbHostTask.h
  *
- *  Created on: 19 lis 2013
+ *  Created on: 7 gru 2013
  *      Author: lukee
  *
  * Copyright (C) 2013  darklukee
@@ -19,20 +19,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
-#ifndef USBTASK_H_
-#define USBTASK_H_
+#ifndef USBHOSTTASK_H_
+#define USBHOSTTASK_H_
 
 #include <cpp_task.hpp>
 
-class UsbTask: public scheduler_task
+class UsbHostTask: public scheduler_task
 {
 public:
-	UsbTask();
+	UsbHostTask();
 	bool init();
 	bool taskEntry();
 	bool run(void *param);
+	//usb specific
+	static void TIM_LED_Config(void);
 private:
-	int iter;
+	int freq;
 };
 
-#endif /* USBTASK_H_ */
+#endif /* USBHOSTTASK_H_ */
