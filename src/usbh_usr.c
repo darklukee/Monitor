@@ -271,7 +271,7 @@ int USBH_USR_MSC_Application(void)
     case USH_USR_FS_INIT:
 
       /* Initialises the File System*/
-      if (f_mount( 0, &fatfs ) != FR_OK ) 
+      if (f_mount( 0, &fatfs , 1) != FR_OK )
       {
         /* efs initialisation fails*/
         return(-1);
@@ -295,7 +295,7 @@ int USBH_USR_MSC_Application(void)
 //      COMMAND_AudioExecuteApplication();
 //
 //      /* Set user initialization flag */
-      USBH_USR_ApplicationState = USH_USR_FS_INIT;
+//      USBH_USR_ApplicationState = USH_USR_FS_INIT;
       break;
 
     default:
