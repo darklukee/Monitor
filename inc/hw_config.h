@@ -10,9 +10,7 @@ extern GPIO_InitTypeDef GPIO_InitStructure;
 extern NVIC_InitTypeDef NVIC_InitStructure;
 
 /* TIM4 and TIM3 Autoreload and Capture Compare register values */
-#define TIM_ARR                          ((uint16_t)1999) //1 kHz na wyjsciu przy preskaler 200 khz
-#define TIM_CCR                          ((uint16_t)0) //0%
-/* definitions used by prvLED_Config() to reconfigure LED pins GPIO<->TIM4 */
+#define TIM_ARR                          ((uint16_t)1999) //1 kHz na wyjsciu przy preskaler 200 khz#define TIM_CCR                          ((uint16_t)0) //0%/* definitions used by prvLED_Config() to reconfigure LED pins GPIO<->TIM4 */
 #define GPIO	0
 #define TIMER	1
 
@@ -78,6 +76,23 @@ void prvPGA_GPIO_Config(void);
 #define KEY_ESC_EXTI_PORT_SOURCE EXTI_PortSourceGPIOB
 #define KEY_ESC_EXTI_PIN_SOURCE EXTI_PinSource5
 #define KEY_ESC_EXTI_IRQn EXTI4_IRQn
+
+static const uint16_t KEY_PIN[KEYn] =
+{ KEY_UP_PIN, KEY_DOWN_PIN, KEY_LEFT_PIN, KEY_RIGHT_PIN, KEY_OK_PIN, KEY_ESC_PIN };
+static GPIO_TypeDef* KEY_PORT[KEYn] =
+{ KEY_UP_GPIO_PORT, KEY_DOWN_GPIO_PORT, KEY_LEFT_GPIO_PORT, KEY_RIGHT_GPIO_PORT, KEY_OK_GPIO_PORT, KEY_ESC_GPIO_PORT };
+static const uint32_t KEY_CLK[KEYn] =
+{ KEY_UP_GPIO_CLK, KEY_DOWN_GPIO_CLK, KEY_LEFT_GPIO_CLK, KEY_RIGHT_GPIO_CLK, KEY_OK_GPIO_CLK, KEY_ESC_GPIO_CLK };
+static const uint16_t KEY_EXTI_LINE[KEYn] =
+{ KEY_UP_EXTI_LINE, KEY_DOWN_EXTI_LINE, KEY_LEFT_EXTI_LINE, KEY_RIGHT_EXTI_LINE, KEY_OK_EXTI_LINE, KEY_ESC_EXTI_LINE };
+static const uint8_t KEY_PORT_SOURCE[KEYn] =
+{ KEY_UP_EXTI_PORT_SOURCE, KEY_DOWN_EXTI_PORT_SOURCE, KEY_LEFT_EXTI_PORT_SOURCE, KEY_RIGHT_EXTI_PORT_SOURCE,
+KEY_OK_EXTI_PORT_SOURCE, KEY_ESC_EXTI_PORT_SOURCE };
+static const uint8_t KEY_PIN_SOURCE[KEYn] =
+{ KEY_UP_EXTI_PIN_SOURCE, KEY_DOWN_EXTI_PIN_SOURCE, KEY_LEFT_EXTI_PIN_SOURCE, KEY_RIGHT_EXTI_PIN_SOURCE,
+KEY_OK_EXTI_PIN_SOURCE, KEY_ESC_EXTI_PIN_SOURCE };
+static const uint8_t KEY_IRQn[KEYn] =
+{ KEY_UP_EXTI_IRQn, KEY_DOWN_EXTI_IRQn, KEY_LEFT_EXTI_IRQn, KEY_RIGHT_EXTI_IRQn, KEY_OK_EXTI_IRQn, KEY_ESC_EXTI_IRQn };
 
 typedef enum
 {

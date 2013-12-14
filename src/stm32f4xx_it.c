@@ -40,6 +40,7 @@
 /* Private variables ---------------------------------------------------------*/
 portBASE_TYPE xHigherPriorityTaskWoken;
 extern xQueueHandle xQueue_I2CEvent;
+extern xQueueHandle xQueue_Keyboard;
 
 //USB
 uint16_t capture = 0;
@@ -47,6 +48,11 @@ extern __IO uint16_t CCR_Val;
 __IO uint8_t LED_Toggle = 0;
 extern USB_OTG_CORE_HANDLE USB_OTG_Core;
 //extern USBH_HOST USB_Host;
+
+extern void UsbTaskToggleEnabled(void);
+
+extern uint8_t keyPressed;
+extern void KeyboardTaskResume(void);
 
 /* Private function prototypes -----------------------------------------------*/
 
@@ -234,6 +240,13 @@ void EXTI9_5_IRQHandler(void)
 	}
 	if (EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
 	{
+//		UsbTaskToggleEnabled(); //TODO: remove
+		xHigherPriorityTaskWoken = pdFALSE;
+		keyPressed |= 1<<KEY_RIGHT;
+		uint8_t *key = &keyPressed;
+		xQueueSendFromISR(xQueue_Keyboard, (void*) &key, &xHigherPriorityTaskWoken); //TODO poiter, references of sth
+		KeyboardTaskResume();
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		EXTI_ClearITPendingBit(KEY_RIGHT_EXTI_LINE);
 	}
 }
@@ -252,7 +265,7 @@ void I2C3_EV_IRQHandler(void)
 	//if (EXTI_GetITStatus(EXTI_Line0) != RESET) //FIXME: wrong EXTI_Line
 	//{
 	//xSemaphoreGiveFromISR(xSemaphoreSW,&xHigherPriorityTaskWoken);
-	xQueueSendFromISR(xQueue_I2CEvent, I2C_GetLastEvent(I2C3), &xHigherPriorityTaskWoken); //TODO poiter, references of sth
+	xQueueSendFromISR(xQueue_I2CEvent, (void*) I2C_GetLastEvent(I2C3), &xHigherPriorityTaskWoken); //TODO poiter, references of sth
 
 	portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	//}

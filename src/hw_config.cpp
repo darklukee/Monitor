@@ -33,14 +33,14 @@ void prvSetupHardware(void)
 
 	// Keyboard init with interupts
 	prvKeyboard_Config();
-/*
-	//Set pins for communication with external chips
-	prvADC_GPIO_Config(); //i2c
-	prvPGA_GPIO_Config(); //spi
+	/*
+	 //Set pins for communication with external chips
+	 prvADC_GPIO_Config(); //i2c
+	 prvPGA_GPIO_Config(); //spi
 
-	//Translator Output Enable conf and set it to 'enable'
-	prvSerialOE_Config();
-*/
+	 //Translator Output Enable conf and set it to 'enable'
+	 prvSerialOE_Config();
+	 */
 	// Configure LIS302 in order to produce data used for TIM4 reconfiguration and LED control
 //	prvMEMS_Config();
 }
@@ -105,22 +105,22 @@ void prvLCD_Config(void)
 	lcdInitConfig();
 }
 
-const uint16_t KEY_PIN[KEYn] =
-{ KEY_UP_PIN, KEY_DOWN_PIN, KEY_LEFT_PIN, KEY_RIGHT_PIN, KEY_OK_PIN, KEY_ESC_PIN };
-GPIO_TypeDef* KEY_PORT[KEYn] =
-{ KEY_UP_GPIO_PORT, KEY_DOWN_GPIO_PORT, KEY_LEFT_GPIO_PORT, KEY_RIGHT_GPIO_PORT, KEY_OK_GPIO_PORT, KEY_ESC_GPIO_PORT };
-const uint32_t KEY_CLK[KEYn] =
-{ KEY_UP_GPIO_CLK, KEY_DOWN_GPIO_CLK, KEY_LEFT_GPIO_CLK, KEY_RIGHT_GPIO_CLK, KEY_OK_GPIO_CLK, KEY_ESC_GPIO_CLK };
-const uint16_t KEY_EXTI_LINE[KEYn] =
-{ KEY_UP_EXTI_LINE, KEY_DOWN_EXTI_LINE, KEY_LEFT_EXTI_LINE, KEY_RIGHT_EXTI_LINE, KEY_OK_EXTI_LINE, KEY_ESC_EXTI_LINE };
-const uint8_t KEY_PORT_SOURCE[KEYn] =
-{ KEY_UP_EXTI_PORT_SOURCE, KEY_DOWN_EXTI_PORT_SOURCE, KEY_LEFT_EXTI_PORT_SOURCE, KEY_RIGHT_EXTI_PORT_SOURCE,
-KEY_OK_EXTI_PORT_SOURCE, KEY_ESC_EXTI_PORT_SOURCE };
-const uint8_t KEY_PIN_SOURCE[KEYn] =
-{ KEY_UP_EXTI_PIN_SOURCE, KEY_DOWN_EXTI_PIN_SOURCE, KEY_LEFT_EXTI_PIN_SOURCE, KEY_RIGHT_EXTI_PIN_SOURCE,
-KEY_OK_EXTI_PIN_SOURCE, KEY_ESC_EXTI_PIN_SOURCE };
-const uint8_t KEY_IRQn[KEYn] =
-{ KEY_UP_EXTI_IRQn, KEY_DOWN_EXTI_IRQn, KEY_LEFT_EXTI_IRQn, KEY_RIGHT_EXTI_IRQn, KEY_OK_EXTI_IRQn, KEY_ESC_EXTI_IRQn };
+//const uint16_t KEY_PIN[KEYn] =
+//{ KEY_UP_PIN, KEY_DOWN_PIN, KEY_LEFT_PIN, KEY_RIGHT_PIN, KEY_OK_PIN, KEY_ESC_PIN };
+//GPIO_TypeDef* KEY_PORT[KEYn] =
+//{ KEY_UP_GPIO_PORT, KEY_DOWN_GPIO_PORT, KEY_LEFT_GPIO_PORT, KEY_RIGHT_GPIO_PORT, KEY_OK_GPIO_PORT, KEY_ESC_GPIO_PORT };
+//const uint32_t KEY_CLK[KEYn] =
+//{ KEY_UP_GPIO_CLK, KEY_DOWN_GPIO_CLK, KEY_LEFT_GPIO_CLK, KEY_RIGHT_GPIO_CLK, KEY_OK_GPIO_CLK, KEY_ESC_GPIO_CLK };
+//const uint16_t KEY_EXTI_LINE[KEYn] =
+//{ KEY_UP_EXTI_LINE, KEY_DOWN_EXTI_LINE, KEY_LEFT_EXTI_LINE, KEY_RIGHT_EXTI_LINE, KEY_OK_EXTI_LINE, KEY_ESC_EXTI_LINE };
+//const uint8_t KEY_PORT_SOURCE[KEYn] =
+//{ KEY_UP_EXTI_PORT_SOURCE, KEY_DOWN_EXTI_PORT_SOURCE, KEY_LEFT_EXTI_PORT_SOURCE, KEY_RIGHT_EXTI_PORT_SOURCE,
+//KEY_OK_EXTI_PORT_SOURCE, KEY_ESC_EXTI_PORT_SOURCE };
+//const uint8_t KEY_PIN_SOURCE[KEYn] =
+//{ KEY_UP_EXTI_PIN_SOURCE, KEY_DOWN_EXTI_PIN_SOURCE, KEY_LEFT_EXTI_PIN_SOURCE, KEY_RIGHT_EXTI_PIN_SOURCE,
+//KEY_OK_EXTI_PIN_SOURCE, KEY_ESC_EXTI_PIN_SOURCE };
+//const uint8_t KEY_IRQn[KEYn] =
+//{ KEY_UP_EXTI_IRQn, KEY_DOWN_EXTI_IRQn, KEY_LEFT_EXTI_IRQn, KEY_RIGHT_EXTI_IRQn, KEY_OK_EXTI_IRQn, KEY_ESC_EXTI_IRQn };
 
 void prvKeyboard_Config(void)
 {
@@ -340,8 +340,8 @@ void prvTIM3_Config(void)
 	TIM_OC1PreloadConfig(TIM3, TIM_OCPreload_Enable);
 
 	//TIM_CCxCmd(TIM3, TIM_Channel_1, ENABLE);
-	int duty =20; //%
-	TIM_SetCompare1(TIM3, TIM_CCR + (TIM_ARR*duty/100));
+	int duty = 20; //%
+	TIM_SetCompare1(TIM3, TIM_CCR + (TIM_ARR * duty / 100));
 
 	/* Enable TIM3 Preload register on ARR */
 	TIM_ARRPreloadConfig(TIM3, ENABLE);
