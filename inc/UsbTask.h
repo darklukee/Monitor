@@ -31,8 +31,17 @@ public:
 	bool init();
 	bool taskEntry();
 	bool run(void *param);
+
+	static bool isConnected();
+	static void setConnected(bool);
+	static bool isEnabled();
+	static void setEnabled(bool);
+	static void toggleEnabled(void);
+
 private:
 	int iter;
+	static bool connected;
+	static bool enabled;
 };
 
 #endif /* USBTASK_H_ */

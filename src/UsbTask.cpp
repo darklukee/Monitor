@@ -22,6 +22,8 @@
 #include <UsbTask.h>
 #include <stdio.h>
 #include "usbh_usr.h"
+bool UsbTask::connected = false;
+bool UsbTask::enabled = true;
 
 UsbTask::UsbTask() :
 	scheduler_task("UsbTask", 1024 * 10, PRIORITY_LOW, NULL)
@@ -42,10 +44,51 @@ bool UsbTask::taskEntry()
 
 bool UsbTask::run(void *param)
 {
-	char folderName[] = "lukee";
-	char buf[20] = "";
-	sprintf(buf, "%s_%03d", folderName, iter++);
-	f_mkdir(buf);
-	vTaskDelay(OS_MS(5000));
+	if (connected && enabled)
+	{
+		char folderName[] = "lukee";
+		char buf[20] = "";
+		sprintf(buf, "%s_%03d", folderName, iter);
+		f_mkdir(buf);
+		vTaskDelay(OS_MS(1000));
+	}
+	else
+		vTaskDelay(OS_MS(500));
+	iter++;
 	return true;
 }
+
+bool UsbTask::isConnected()
+{
+	return connected;
+}
+
+void UsbTask::setConnected(bool _connected)
+{
+	connected = _connected;
+}
+
+bool UsbTask::isEnabled()
+{
+	return enabled;
+}
+
+void UsbTask::setEnabled(bool _enabled)
+{
+	enabled = _enabled;
+}
+
+void UsbTask::toggleEnabled()
+{
+	enabled ^= true;
+}
+
+//C extern functions wrappers
+extern "C"
+{
+void UsbTaskToggleEnabled()
+{
+	UsbTask::toggleEnabled();
+}
+}
+

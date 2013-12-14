@@ -22,6 +22,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_usr.h"
 #include "stm32f4xx_it.h"
+#include "UsbTask.h"
 
 /** @addtogroup STM32F4-Discovery_Audio_Player_Recorder
   * @{
@@ -271,7 +272,7 @@ int USBH_USR_MSC_Application(void)
     case USH_USR_FS_INIT:
 
       /* Initialises the File System*/
-      if (f_mount( 0, &fatfs , 1) != FR_OK )
+      if (f_mount( 0, &fatfs) != FR_OK )
       {
         /* efs initialisation fails*/
         return(-1);
@@ -287,12 +288,11 @@ int USBH_USR_MSC_Application(void)
         }
       }
       /* Go to menu */
-      USBH_USR_ApplicationState = USH_USR_AUDIO;
+      USBH_USR_ApplicationState = USH_USR_RUN;
       break;
 
-    case USH_USR_AUDIO:
-//      /* Go to Audio menu */
-//      COMMAND_AudioExecuteApplication();
+    case USH_USR_RUN:
+    	UsbTask::setConnected(true);
 //
 //      /* Set user initialization flag */
 //      USBH_USR_ApplicationState = USH_USR_FS_INIT;
@@ -313,6 +313,7 @@ int USBH_USR_MSC_Application(void)
 void USBH_USR_DeInit(void)
 {
   USBH_USR_ApplicationState = USH_USR_FS_INIT;
+  UsbTask::setConnected(false);
 }
 
 /**
