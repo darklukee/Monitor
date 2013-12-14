@@ -57,9 +57,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/common/STM32_USB_HOST_Library/Core/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/common/STM32_USB_HOST_Library/Class/MSC/inc}&quot;"/>
 								</option>
-								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.2042796804" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
-								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.2042796804" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.157073429" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1783860365" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
@@ -132,11 +130,12 @@
 									<listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="stdc++"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.scriptfile.1666783755" name="Script files (-T)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.scriptfile" valueType="stringList">
-									<listOptionValue builtIn="false" value="../stm32f4_flash.ld"/>
+									<listOptionValue builtIn="false" value="../STM32F407IG_FLASH.ld"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.paths.1397708258" name="Library search path (-L)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/GLCD-arm/Release}&quot;"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.printgcsections.1764047865" name="Print removed sections (-Xlinker --print-gc-sections)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.printgcsections" value="false" valueType="boolean"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input.1623756638" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -165,9 +164,9 @@
 						<entry excluding="stm32f4xx_usart.c|stm32f4xx_rng.c|stm32f4xx_ltdc.c|stm32f4xx_fsmc.c|stm32f4xx_dma2d.c|stm32f4xx_dcmi.c|stm32f4xx_sai.c|stm32f4xx_hash.c|stm32f4xx_hash_sha1.c|stm32f4xx_hash_md5.c|stm32f4xx_fmc.c|stm32f4xx_dac.c|stm32f4xx_cryp.c|stm32f4xx_cryp_tdes.c|stm32f4xx_cryp_des.c|stm32f4xx_cryp_aes.c|stm32f4xx_crc.c|stm32f4xx_can.c" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="STM32F4xx_StdPeriph_Driver"/>
 						<entry excluding="Class/HID" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STM32_USB_HOST_Library"/>
 						<entry excluding="src/usb_otg.c|src/usb_dcd.c|src/usb_dcd_int.c|src/usb_bsp_template.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STM32_USB_OTG_Driver"/>
-						<entry excluding="src/diskio.c|src/option/syncobj.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="fat_fs"/>
+						<entry excluding="src/option/unicode.c|src/option/cc950.c|src/option/cc949.c|src/option/cc936.c|src/option/cc932.c|src/diskio.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="fat_fs"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="inc"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="stm32f4xx_interrupts.cpp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -225,7 +224,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Monitor2/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 								</option>
-								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1075455736" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs.1075455736" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.1559999750" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
@@ -240,7 +239,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Monitor2/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 								</option>
-								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1305199882" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" valueType="definedSymbols">
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1305199882" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.2125135272" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
@@ -255,7 +254,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Monitor2/inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/inc}&quot;"/>
 								</option>
-								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs.1929491310" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs" valueType="definedSymbols">
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs.1929491310" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32F40_41xxx"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.input.1168286953" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.input"/>
@@ -294,7 +293,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="STM32F4xx_StdPeriph_Driver/stm32f4xx_ltdc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dma2d.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sai.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dac.c|STM32_USB_OTG_Driver/src/usb_otg.c|STM32_USB_OTG_Driver/src/usb_dcd.c|STM32_USB_OTG_Driver/src/usb_dcd_int.c|STM32_USB_OTG_Driver/src/usb_bsp_template.c|STM32_USB_HOST_Library/Class/HID|fat_fs/src/diskio.c|fat_fs/src/option/syncobj.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_wwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_usart.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sdio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_rng.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_iwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_sha1.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_md5.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fsmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dcmi.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_tdes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_des.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_aes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_crc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_can.c|STM32F4-Discovery/stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/stm32f4xx_interrupts.cpp|fat_fs/src/option/unicode.c|fat_fs/src/option/cc950.c|fat_fs/src/option/cc949.c|fat_fs/src/option/cc936.c|fat_fs/src/option/cc932.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_ltdc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dma2d.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sai.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dac.c|STM32_USB_OTG_Driver/src/usb_otg.c|STM32_USB_OTG_Driver/src/usb_dcd.c|STM32_USB_OTG_Driver/src/usb_dcd_int.c|STM32_USB_OTG_Driver/src/usb_bsp_template.c|STM32_USB_HOST_Library/Class/HID|fat_fs/src/diskio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_wwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_usart.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sdio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_rng.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_iwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_sha1.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_md5.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fsmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dcmi.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_tdes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_des.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_aes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_crc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_can.c|STM32F4-Discovery/stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -344,6 +343,7 @@
 		</configuration>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/monitor"/>
+			<resource resourceType="PROJECT" workspacePath="/Monitor2"/>
 			<resource resourceType="PROJECT" workspacePath="/GLCD-arm"/>
 		</configuration>
 	</storageModule>
