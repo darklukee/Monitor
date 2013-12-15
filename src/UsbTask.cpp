@@ -21,6 +21,7 @@
  */
 #include <UsbTask.h>
 #include <stdio.h>
+#include <string.h>
 #include "usbh_usr.h"
 bool UsbTask::connected = false;
 bool UsbTask::enabled = true;
@@ -30,6 +31,9 @@ UsbTask::UsbTask() :
 {
 	// TODO Auto-generated constructor stub
 	iter = 0;
+	freq = 20;
+	state = UsbTaskInit;
+	strcpy(fileName, "test_file.txt");
 }
 
 bool UsbTask::init()
@@ -44,16 +48,52 @@ bool UsbTask::taskEntry()
 
 bool UsbTask::run(void *param)
 {
-	if (connected && enabled)
+	FRESULT fr;
+	UINT bw;
+	switch (state)
 	{
-		char folderName[] = "lukee";
-		char buf[20] = "";
-		sprintf(buf, "%s_%03d", folderName, iter);
-		f_mkdir(buf);
-		vTaskDelay(OS_MS(1000));
+	case UsbTaskInit:
+		if (connected && enabled)
+		{
+			vTaskDelay(OS_MS(100)); //TODO: necessary?
+			fr = f_open(&file, fileName, FA_CREATE_ALWAYS | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
+			if (fr == FR_OK)
+				state = UsbTaskRun;
+		}
+		else
+		{
+			vTaskDelay(OS_MS(500));
+		}
+		break;
+	case UsbTaskRun:
+		if (connected && enabled)
+		{
+			const unsigned int size = 128;
+			char buf[size];
+			unsigned int len = sprintf(buf, "Test Write. time: %.3f, iter: %d\n", double(freq*iter)/1000, iter);
+			if(len<=size)
+				fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
+			if (fr != FR_OK || bw < len)
+			{
+				state = UsbTaskDeInit;
+				setEnabled(false);
+			}
+			vTaskDelay(OS_MS(freq));
+		}
+		else
+		{
+			state = UsbTaskDeInit;
+		}
+		break;
+	case UsbTaskDeInit:
+		vTaskDelay(OS_MS(200));
+		f_close(&file);
+		state = UsbTaskInit;
+		break;
+	default:
+		state = UsbTaskInit;
+		break;
 	}
-	else
-		vTaskDelay(OS_MS(500));
 	iter++;
 	return true;
 }

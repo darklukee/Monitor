@@ -23,14 +23,20 @@
 #define USBTASK_H_
 
 #include <cpp_task.hpp>
+extern "C"
+{
+#include "ff.h"
+}
+
+enum UsbTaskState
+{
+	UsbTaskInit, UsbTaskRun, UsbTaskDeInit
+};
 
 class UsbTask: public scheduler_task
 {
 public:
-	UsbTask();
-	bool init();
-	bool taskEntry();
-	bool run(void *param);
+	UsbTask();bool init();bool taskEntry();bool run(void *param);
 
 	static bool isConnected();
 	static void setConnected(bool);
@@ -40,8 +46,12 @@ public:
 
 private:
 	int iter;
+	int freq;
 	static bool connected;
 	static bool enabled;
+	FIL file; //FatFs file object
+	char fileName[32];
+	UsbTaskState state;
 };
 
 #endif /* USBTASK_H_ */

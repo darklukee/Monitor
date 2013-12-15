@@ -34,7 +34,6 @@ public:
 	bool run(void *param);
 
 	void keyAction(int);
-//	static void taskResume();
 
 private:
 	void debounce(void);

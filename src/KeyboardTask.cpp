@@ -189,12 +189,6 @@ bool KeyboardTask::enabledLeft()
 	return false;
 }
 
-//void KeyboardTask::taskResume(void)
-//{
-////	vTaskResume(getTaskHandle());
-//
-//}
-
 //C wrapper for interrupts
 extern "C"
 {
