@@ -38,8 +38,7 @@ bool ExtADCTask::init()
 
 bool ExtADCTask::taskEntry()
 {
-	extADC.config(); //TODO: setup LTC2991 for measurement
-	return true;
+	return extADC.config(); //TODO: setup LTC2991 for measurement
 }
 
 bool ExtADCTask::run(void *param)

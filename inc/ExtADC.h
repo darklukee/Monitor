@@ -30,7 +30,7 @@ enum Dir
 	DirWrite = 0, DirRead = !DirWrite
 };
 
-typedef uint8_t i2cBuff[4];
+typedef uint8_t i2cBuff[4]; //FIXME: may be not enough
 
 struct I2CData
 {
@@ -47,12 +47,14 @@ public:
 	~ExtADC();
 	static void GPIO_Config(void);
 	void init(void);
-	void config(void);
+	bool config(void);
 	bool process(I2CData &data);
 
 private:
 	void i2cWrite(I2CData &data);
 	void i2cRead(I2CData &data);
+
+	bool verifyI2cWrite(I2CData &data);
 
 	static bool GPIO_Configured;
 	static const uint8_t addr; //LTC2991 hardware address

@@ -110,7 +110,7 @@ void ExtADC::init(void)
 /**
  * Configure ExtADC in specific mode
  */
-void ExtADC::config(void)
+bool ExtADC::config(void)
 {
 	//TODO: make it possible to change parameters in runtime
 
@@ -123,6 +123,8 @@ void ExtADC::config(void)
 	config.val[1] = EXTADC_BIT_V7_8_T | EXTADC_BIT_V7_8_K; //temperature measurement in kelvin
 	config.val[2] = EXTADC_BIT_REPEAT | EXTADC_BIT_TINT_K; //repeat mode, tint in kelvin
 	process(config);
+	if(!verifyI2cWrite(config))
+		return false;
 
 	//enable channels:
 	config.dir = DirWrite;
@@ -130,7 +132,10 @@ void ExtADC::config(void)
 	config.reg = EXTADC_REG_CH_EN;
 	config.val[0] = EXTADC_CH_V1_2 | EXTADC_CH_V3_4 | EXTADC_CH_V5_6 | EXTADC_CH_T4; //TODO: Tint and Vcc
 	process(config);
+	if(!verifyI2cWrite(config))
+		return false;
 
+	return true;
 }
 bool ExtADC::process(I2CData& data)
 {
@@ -139,7 +144,7 @@ bool ExtADC::process(I2CData& data)
 	I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, ENABLE); //enable interrupts
 	//TODO: empty queue xQueue_I2CEvent
 
-	/* Start the config sequence */
+	//Start the config sequence, STOP inside i2cWrite and i2cRead
 	I2C_GenerateSTART(ADC_I2C, ENABLE);
 
 	if (data.dir == DirWrite)
@@ -287,4 +292,20 @@ void ExtADC::i2cRead(I2CData &data)
 	}
 
 	return;
+}
+
+bool ExtADC::verifyI2cWrite(I2CData& data)
+{
+	I2CData verify;
+	verify.reg = data.reg;
+	verify.length = data.length;
+	verify.dir = DirRead; //change direction
+
+	process(verify);
+	for(int i =0; i<data.length; i++)
+		{
+			if(verify.val[i] != data.val[i])
+				return false;
+		}
+	return true;
 }
