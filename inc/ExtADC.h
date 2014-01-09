@@ -30,14 +30,22 @@ enum Dir
 	DirWrite = 0, DirRead = !DirWrite
 };
 
-typedef uint8_t i2cBuff[4]; //FIXME: may be not enough
+const uint8_t maxI2cBuff = 8;
+typedef uint8_t i2cBuff[maxI2cBuff]; //FIXME: may be not enough
 
 struct I2CData
 {
-	uint8_t reg;
 	i2cBuff val;
-	uint8_t length;
 	Dir dir;
+	uint8_t reg;
+	uint8_t length;
+};
+
+struct AdcData
+{
+	uint8_t values[20];
+	uint8_t length;
+	uint8_t stat;
 };
 
 class ExtADC
@@ -49,6 +57,8 @@ public:
 	void init(void);
 	bool config(void);
 	bool process(I2CData &data);
+	uint8_t getStatus(void);
+	bool getData(I2CData &data);
 
 private:
 	void i2cWrite(I2CData &data);

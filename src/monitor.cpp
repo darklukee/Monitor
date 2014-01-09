@@ -36,22 +36,28 @@
 
 //debugger crash test TODO: check if necessary
 #include "Global.h"
+#include "DataStructures.h"
+
 #include "ExtADC.h"
 #include "ExtADCTask.h"
+#include "CalculatorTask.h"
 #include "Display.h"
-
-#include "TestTask.h"
 #include "DisplayTask.h"
-#include "LcdPinTestTask.h"
 #include "UsbTask.h"
 #include "UsbHostTask.h"
 #include "KeyboardTask.h"
 
+//#include "TestTask.h"
+//#include "LcdPinTestTask.h"
+
+
+
 // global queues
 //i2c
 xQueueHandle xQueue_I2CEvent;
-xQueueHandle xQueue_I2CQuery;
-xQueueHandle xQueue_I2CRx;
+xQueueHandle xQueue_AdcData;
+//xQueueHandle xQueue_I2CQuery;
+//xQueueHandle xQueue_I2CRx;
 //glcd
 xQueueHandle xQueue_Lcd;
 
@@ -63,7 +69,7 @@ int main(void)
 	Global &glob = Global::getInstance();
 //	glob.setSwitch(eLcdMenu, (uint8_t) true);
 	ExtADC ext;
-	Display dis;
+//	Display dis;
 	ExtADCTask ext2;
 
 	printf("%f", 3.141592);
@@ -71,10 +77,11 @@ int main(void)
 	/*end of debugger crash prevention*/
 
 	//create queues
-	xQueue_I2CEvent = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
-	xQueue_I2CQuery = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
-	xQueue_I2CRx = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
-	xQueue_Lcd = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
+	xQueue_I2CEvent = xQueueCreate(10, sizeof(uint8_t));
+	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
+//	xQueue_I2CQuery = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
+//	xQueue_I2CRx = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
+	xQueue_Lcd = xQueueCreate(10, sizeof(LcdData)); //TODO: set size
 
 	/* initialize hardware... */
 	prvSetupHardware();
@@ -83,9 +90,12 @@ int main(void)
 //	scheduler_add_task(new TestTask());
 	scheduler_add_task(new DisplayTask());
 //	scheduler_add_task(new LcdPinTestTask());
+//	scheduler_add_task(new ExtADCTask()); //TODO: uncomment
 	scheduler_add_task(new UsbTask());
 	scheduler_add_task(new UsbHostTask());
 	scheduler_add_task(new KeyboardTask());
+	scheduler_add_task(new CalculatorTask());
+
 
 	/* Start the scheduler. */
 	//vTaskStartScheduler();

@@ -1,10 +1,10 @@
 /*
- * ExtADCTask.h
+ * CalculatorTask.h
  *
- *  Created on: 29 sie 2013
+ *  Created on: 8 sty 2014
  *      Author: lukee
  *
- * Copyright (C) 2013  darklukee
+ * Copyright (C) 2014  darklukee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,27 +19,40 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
-
-#ifndef EXTADCTASK_H_
-#define EXTADCTASK_H_
+#ifndef CALCULATORTASK_H_
+#define CALCULATORTASK_H_
 
 #include <cpp_task.hpp>
-#include "ExtADC.h"
 
-const int maxReceiveBuffer = 3;
+const uint16_t tabSize = 50;
 
-class ExtADCTask: public scheduler_task
+class CalculatorTask: public scheduler_task
 {
 public:
-	ExtADCTask();
-//	~ExtADCTask();
+	CalculatorTask();
 	bool init();
 	bool taskEntry();
 	bool run(void *param);
 
 private:
-	ExtADC extADC;
-	I2CData receiveBuffer[maxReceiveBuffer];
+	float voltageTab[tabSize];
+	float voltageMean;
+	uint16_t voltageTabPt;
+
+	float currentTab[tabSize];
+	float currentMean;
+	uint16_t currentTabPt;
+
+	float addVoltage(float);
+	float getVoltageMean(void);
+	float addCurrent(float);
+	float getCurrentMean(void);
+
+	bool dataToLcd;
+	void sendToLcd(void);
+//	bool dataToStorage;
+	void sendToStorage(void);
+
 };
 
-#endif /* EXTADCTASK_H_ */
+#endif /* CALCULATORTASK_H_ */

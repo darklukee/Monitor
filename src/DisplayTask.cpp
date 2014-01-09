@@ -22,6 +22,9 @@
 #include <DisplayTask.h>
 #include "glcd.h"
 #include "fonts/SystemFont5x7.h"
+#include "DataStructures.h"
+
+extern xQueueHandle xQueue_Lcd;
 
 DisplayTask::DisplayTask() :
 	scheduler_task("DisplayTask", 1024 * 10, PRIORITY_LOW, NULL)
@@ -50,8 +53,16 @@ bool DisplayTask::taskEntry()
 
 bool DisplayTask::run(void *param)
 {
+	LcdData values;
+	if (xQueueReceive(xQueue_Lcd, &values, 0)) //TODO: take only latest data and discard rest
+	{
+		char text[32];
+		sprintf(text, "Voltage: %6f mV\nCurrent: %6f mA", values.voltage, values.current);
+		GLCD.CursorTo(0,0);
+		GLCD.Puts(text);
+	}
 
-	Demo();
+//	Demo();
 
 //	vTaskSuspend(this->getTaskHandle());
 	return true;
@@ -62,7 +73,7 @@ void DisplayTask::Demo()
 	char hello[] = "Hello World";
 	static unsigned int i;
 	i++;
-	if(i>=8)
+	if (i >= 8)
 	{
 		GLCD.ClearScreen();
 	}
@@ -71,7 +82,7 @@ void DisplayTask::Demo()
 	if (toggle)
 	{
 		GLCD.SetFontColor(BLACK);
-		GLCD.CursorTo(i,i);
+		GLCD.CursorTo(i, i);
 		GLCD.Puts(hello);
 //		GLCD.PutChar('c');
 //		GLCD.DrawCircle(100,20,10,BLACK);

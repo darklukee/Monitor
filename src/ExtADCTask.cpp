@@ -22,12 +22,17 @@
 
 #include "ExtADCTask.h"
 
-extern xQueueHandle xQueue_I2CQuery;
-extern xQueueHandle xQueue_I2CRx;
+//extern xQueueHandle xQueue_I2CQuery;
+//extern xQueueHandle xQueue_I2CRx;
+extern xQueueHandle xQueue_AdcData;
 
-ExtADCTask::ExtADCTask() : scheduler_task("ExtADCTask", 1024, 1, NULL)
+ExtADCTask::ExtADCTask() :
+	scheduler_task("ExtADCTask", 1024, PRIORITY_MEDIUM, NULL)
 {
-
+	for (int i = 0; i < maxReceiveBuffer; i++)
+	{
+		receiveBuffer[i].dir = DirRead;
+	}
 }
 
 bool ExtADCTask::init()
@@ -43,17 +48,49 @@ bool ExtADCTask::taskEntry()
 
 bool ExtADCTask::run(void *param)
 {
-	if (xQueueReceive(xQueue_I2CQuery, &xBuffer_receive, portMAX_DELAY) == pdPASS)
+	uint8_t stat = extADC.getStatus();
+	if (stat != 0)
 	{
-		//I2CData receive;
-		//FIXME: copy buffer and send to Rx
-		if (extADC.process(xBuffer_receive)) //TODO: this may fail
+		//TODO: get only values that are available  (based ona stat)
+		//TODO: reduce data payload by getting only necessary fields
+
+		receiveBuffer[0].length = maxI2cBuff;
+		receiveBuffer[0].reg = EXTADC_REG_V1;
+		receiveBuffer[1].length = maxI2cBuff;
+		receiveBuffer[1].reg = EXTADC_REG_V5;
+		receiveBuffer[2].length = 4;
+		receiveBuffer[2].reg = EXTADC_REG_TINT;
+
+		for (int i = 0; i < maxReceiveBuffer; i++)
 		{
-			//receiver mode. send answer back
-			I2CData *receive; //TODO: stub, repair
-			xQueueSend(xQueue_I2CRx, (void * ) &receive, 0);
+			extADC.getData(receiveBuffer[i]);
 		}
+
+		AdcData outputData;
+		outputData.length = receiveBuffer[0].length + receiveBuffer[1].length + receiveBuffer[2].length;
+		outputData.stat = stat;
+		//TODO: add time stamp
+
+		int j = 0;
+		for (int i = 0; i < receiveBuffer[0].length; i++)
+		{
+			outputData.values[j + i] = receiveBuffer[0].val[i];
+		}
+		j += receiveBuffer[0].length;
+		for (int i = 0; i < receiveBuffer[1].length; i++)
+		{
+			outputData.values[j + i] = receiveBuffer[1].val[i];
+		}
+		j += receiveBuffer[1].length;
+		for (int i = 0; i < receiveBuffer[2].length; i++)
+		{
+			outputData.values[j + i] = receiveBuffer[2].val[i];
+		}
+
+		//send output data;
+		xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
 	}
+
 	taskYIELD(); //task is going to ready state to allow next one to run
 	return true;
 }

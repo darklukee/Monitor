@@ -1,10 +1,10 @@
 /*
- * ExtADCTask.h
+ * DataStructures.h
  *
- *  Created on: 29 sie 2013
+ *  Created on: 9 sty 2014
  *      Author: lukee
  *
- * Copyright (C) 2013  darklukee
+ * Copyright (C) 2014  darklukee
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,27 +19,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
+#ifndef DATASTRUCTURES_H_
+#define DATASTRUCTURES_H_
 
-#ifndef EXTADCTASK_H_
-#define EXTADCTASK_H_
-
-#include <cpp_task.hpp>
-#include "ExtADC.h"
-
-const int maxReceiveBuffer = 3;
-
-class ExtADCTask: public scheduler_task
+struct LcdData
 {
-public:
-	ExtADCTask();
-//	~ExtADCTask();
-	bool init();
-	bool taskEntry();
-	bool run(void *param);
-
-private:
-	ExtADC extADC;
-	I2CData receiveBuffer[maxReceiveBuffer];
+	float voltage;
+	float current;
+//	auto time; //TODO: add time and others
 };
 
-#endif /* EXTADCTASK_H_ */
+#endif /* DATASTRUCTURES_H_ */

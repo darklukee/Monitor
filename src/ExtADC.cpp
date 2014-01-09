@@ -294,12 +294,27 @@ void ExtADC::i2cRead(I2CData &data)
 	return;
 }
 
+uint8_t ExtADC::getStatus(void)
+{
+	I2CData status;
+	status.dir = DirRead;
+	status.reg = EXTADC_REG_STAT;
+	status.length = 1;
+	process(status);
+	return status.val[0];
+}
+
+bool ExtADC::getData(I2CData& data)
+{
+
+}
+
 bool ExtADC::verifyI2cWrite(I2CData& data)
 {
 	I2CData verify;
+	verify.dir = DirRead; //change direction
 	verify.reg = data.reg;
 	verify.length = data.length;
-	verify.dir = DirRead; //change direction
 
 	process(verify);
 	for(int i =0; i<data.length; i++)
