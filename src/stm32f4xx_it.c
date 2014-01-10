@@ -265,7 +265,12 @@ void I2C3_EV_IRQHandler(void)
 	//if (EXTI_GetITStatus(EXTI_Line0) != RESET) //FIXME: wrong EXTI_Line
 	//{
 	//xSemaphoreGiveFromISR(xSemaphoreSW,&xHigherPriorityTaskWoken);
-	xQueueSendFromISR(xQueue_I2CEvent, (void*) I2C_GetLastEvent(I2C3), &xHigherPriorityTaskWoken); //TODO poiter, references of sth
+//	unsigned portBASE_TYPE mess = uxQueueMessagesWaiting( xQueue_I2CEvent );
+//	if(mess <10) //TODO: remove this
+//	{
+		uint32_t lastEvent = I2C_GetLastEvent(I2C3);
+		xQueueSendFromISR(xQueue_I2CEvent, (void*) &lastEvent, &xHigherPriorityTaskWoken);
+//	}
 
 	portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	//}

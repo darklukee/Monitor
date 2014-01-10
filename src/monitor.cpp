@@ -53,8 +53,6 @@
 //i2c
 xQueueHandle xQueue_I2CEvent;
 xQueueHandle xQueue_AdcData;
-//xQueueHandle xQueue_I2CQuery;
-//xQueueHandle xQueue_I2CRx;
 //glcd
 xQueueHandle xQueue_Lcd;
 
@@ -63,19 +61,17 @@ int main(void)
 	/*debugger crash workaround TODO: deal with this abomination */
 	Global &glob = Global::getInstance();
 //	glob.setSwitch(eLcdMenu, (uint8_t) true);
-	ExtADC ext;
+//	ExtADC ext;
 //	Display dis;
-	ExtADCTask ext2;
+//	ExtADCTask ext2;
 
 	printf("%f", 3.141592);
 
 	/*end of debugger crash prevention*/
 
 	//create queues
-	xQueue_I2CEvent = xQueueCreate(10, sizeof(uint8_t));
+	xQueue_I2CEvent = xQueueCreate(10, sizeof(uint32_t));
 	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
-//	xQueue_I2CQuery = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
-//	xQueue_I2CRx = xQueueCreate(10, sizeof(uint8_t)); //TODO: set size
 	xQueue_Lcd = xQueueCreate(10, sizeof(LcdData)); //TODO: set size
 
 	/* initialize hardware... */
@@ -85,7 +81,7 @@ int main(void)
 //	scheduler_add_task(new TestTask());
 //	scheduler_add_task(new LcdPinTestTask());
 	scheduler_add_task(new DisplayTask());
-//	scheduler_add_task(new ExtADCTask()); //TODO: uncomment
+//	scheduler_add_task(new ExtADCTask());
 	scheduler_add_task(new UsbTask());
 	scheduler_add_task(new UsbHostTask());
 	scheduler_add_task(new KeyboardTask());
