@@ -30,7 +30,6 @@
 #include "hw_config.h"
 
 #include <stdio.h> //printf//#include "math.h"
-
 //cpp_wrapper
 #include <cpp_task.hpp>
 
@@ -50,8 +49,6 @@
 //#include "TestTask.h"
 //#include "LcdPinTestTask.h"
 
-
-
 // global queues
 //i2c
 xQueueHandle xQueue_I2CEvent;
@@ -60,8 +57,6 @@ xQueueHandle xQueue_AdcData;
 //xQueueHandle xQueue_I2CRx;
 //glcd
 xQueueHandle xQueue_Lcd;
-
-
 
 int main(void)
 {
@@ -88,14 +83,13 @@ int main(void)
 
 	/* Start the tasks  */
 //	scheduler_add_task(new TestTask());
-	scheduler_add_task(new DisplayTask());
 //	scheduler_add_task(new LcdPinTestTask());
+	scheduler_add_task(new DisplayTask());
 //	scheduler_add_task(new ExtADCTask()); //TODO: uncomment
 	scheduler_add_task(new UsbTask());
 	scheduler_add_task(new UsbHostTask());
 	scheduler_add_task(new KeyboardTask());
 	scheduler_add_task(new CalculatorTask());
-
 
 	/* Start the scheduler. */
 	//vTaskStartScheduler();

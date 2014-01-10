@@ -23,14 +23,16 @@
 #include "glcd.h"
 #include "fonts/SystemFont5x7.h"
 #include "DataStructures.h"
+#include "stdio.h"
 
 extern xQueueHandle xQueue_Lcd;
 
 DisplayTask::DisplayTask() :
-	scheduler_task("DisplayTask", 1024 * 10, PRIORITY_LOW, NULL)
+	scheduler_task("DisplayTask", 1024 * 20, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
 	toggle = false;
+	initiated = false;
 }
 
 bool DisplayTask::init()
@@ -48,6 +50,7 @@ bool DisplayTask::taskEntry()
 //	GLCD.CursorTo(0,0);
 	GLCD.SelectFont(SystemFont5x7);
 //	GLCD.DefineArea(0,0,127,63);
+	initiated = true;
 	return true;
 }
 
@@ -56,16 +59,48 @@ bool DisplayTask::run(void *param)
 	LcdData values;
 	if (xQueueReceive(xQueue_Lcd, &values, 0)) //TODO: take only latest data and discard rest
 	{
-		char text[32];
-		sprintf(text, "Voltage: %6f mV\nCurrent: %6f mA", values.voltage, values.current);
-		GLCD.CursorTo(0,0);
-		GLCD.Puts(text);
+		GLCD.CursorTo(0, 0);
+		printf("Voltage: %6f mV\nCurrent: %6f mA\n", values.voltage, values.current);
+//		fflush(stdout);
 	}
 
-//	Demo();
+	static int i = 0;
+	GLCD.CursorTo(0, 7);
+	printf("status: %d", i++);
+	fflush(stdout);
+	//Demo();
 
 //	vTaskSuspend(this->getTaskHandle());
 	return true;
+}
+
+void DisplayTask::putChar(char ch)
+{
+	//TODO: add mutex on glcd
+	GLCD.PutChar(ch);
+}
+
+extern "C"
+{
+void DisplayTaskPutChar(char ch)
+{
+	static DisplayTask* display;
+	if (!display) //until successful
+		display = dynamic_cast<DisplayTask*>(scheduler_task::getTaskPtrByName("DisplayTask"));
+
+	if (display)
+	{
+		if (display->isInitiated())
+		{
+			display->putChar(ch);
+		}
+	}
+}
+}
+
+bool DisplayTask::isInitiated(void)
+{
+	return initiated;
 }
 
 void DisplayTask::Demo()

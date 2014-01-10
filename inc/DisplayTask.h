@@ -32,9 +32,13 @@ public:
 	bool init();
 	bool taskEntry();
 	bool run(void *param);
+
+	bool isInitiated(void);
+	void putChar(char);
 private:
 	glcd GLCD;
 	bool toggle;
+	bool initiated;
 	void Demo();
 };
 

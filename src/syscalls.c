@@ -20,14 +20,17 @@
 /* platform dependent definitions */
 #include "syscalls_if.h"
 
- char getch()
- {
-	 return 0;
- }
- void putch()
- {
-	 return;
- }
+extern void DisplayTaskPutChar(char);
+
+char getch()
+{
+	return 0;
+}
+void putch(char ch)
+{
+	DisplayTaskPutChar(ch);
+	return;
+}
 
 /* new code for _read_r provided by Alexey Shusharin - Thanks */
 _ssize_t _read_r(struct _reent *r, int file, void *ptr, size_t len)
@@ -39,7 +42,7 @@ _ssize_t _read_r(struct _reent *r, int file, void *ptr, size_t len)
 	p = (unsigned char*) ptr;
 	for (i = 0; i < len; i++)
 	{
-			c = getch();
+		c = getch();
 
 		*p++ = c;
 #ifdef ECHOBACK
@@ -224,7 +227,6 @@ int _read(int fd, char *buf, size_t cnt)
 int _write(int fd, const char *buf, size_t cnt)
 {
 	int i;
-
 	for (i = 0; i < cnt; i++)
 		putch(buf[i]);
 
