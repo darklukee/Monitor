@@ -25,6 +25,7 @@
 #include "stm32f4xx_gpio.h"
 
 #include "UsbTask.h"
+#include "hw_config.h";
 
 xQueueHandle xQueue_Keyboard;
 uint8_t keyPressed; //for queue
@@ -47,6 +48,7 @@ KeyboardTask::KeyboardTask() :
 
 bool KeyboardTask::init()
 {
+	prvKeyboard_Config();
 	keyClearAll();
 	xQueue_Keyboard = xQueueCreate(10, sizeof(uint8_t*)); //TODO: set size
 	return true;

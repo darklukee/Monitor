@@ -20,10 +20,13 @@
  * along with this program.  If not, see {http://www.gnu.org/licenses/}.
  */
 #include <DisplayTask.h>
+#include "stdio.h"
+
 #include "glcd.h"
 #include "fonts/SystemFont5x7.h"
+
 #include "DataStructures.h"
-#include "stdio.h"
+#include "hw_config.h"
 
 extern xQueueHandle xQueue_Lcd;
 
@@ -37,7 +40,10 @@ DisplayTask::DisplayTask() :
 
 bool DisplayTask::init()
 {
-//	lcd.Init(); //cant use here
+	// LCD pin init
+	prvLCD_Config();
+	// Initialize LCD LED PWM. Timer initialization included
+	prvLCDLED_Config();
 	return true;
 }
 
@@ -47,9 +53,9 @@ bool DisplayTask::taskEntry()
 //	GLCD.Init(INVERTED);
 	GLCD.Init();
 	GLCD.ClearScreen();
-//	GLCD.CursorTo(0,0);
 	GLCD.SelectFont(SystemFont5x7);
 //	GLCD.DefineArea(0,0,127,63);
+
 	initiated = true;
 	return true;
 }

@@ -21,6 +21,7 @@
  */
 
 #include "ExtADCTask.h"
+#include "hw_config.h"
 
 //extern xQueueHandle xQueue_I2CQuery;
 //extern xQueueHandle xQueue_I2CRx;
@@ -38,6 +39,7 @@ ExtADCTask::ExtADCTask() :
 bool ExtADCTask::init()
 {
 	extADC.init();
+	prvSerialOE_Config();
 	return true;
 }
 

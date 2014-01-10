@@ -27,7 +27,6 @@ class PGA
 {
 public:
 	PGA();
-	~PGA();
 	static void GPIO_Config(void);
 
 private:

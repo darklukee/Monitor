@@ -31,11 +31,6 @@ PGA::PGA()
 	// TODO Auto-generated constructor stub
 }
 
-PGA::~PGA()
-{
-	// TODO Auto-generated destructor stub
-}
-
 void PGA::GPIO_Config(void)
 {
 	//TODO: implement me!
