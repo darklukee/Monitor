@@ -22,11 +22,37 @@
 #ifndef DATASTRUCTURES_H_
 #define DATASTRUCTURES_H_
 
+#include<stdint.h>
+
 struct LcdData
 {
 	float voltage;
 	float current;
 //	auto time; //TODO: add time and others
+};
+
+typedef enum
+{
+	DirWrite = 0, DirRead = !DirWrite
+} Dir;
+
+#define I2C_BUFF_SIZE  8
+typedef uint8_t i2cBuff[I2C_BUFF_SIZE]; //FIXME: may be not enough
+
+typedef struct
+{
+	i2cBuff val;
+	Dir dir;
+	uint8_t reg;
+	uint8_t length;
+} I2CData;
+#define I2C_DATA_SIZE 4 //TODO: 2 should be sufficient
+
+struct AdcData
+{
+	uint8_t values[20];
+	uint8_t length;
+	uint8_t stat;
 };
 
 #endif /* DATASTRUCTURES_H_ */

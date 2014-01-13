@@ -70,7 +70,7 @@ int main(void)
 	/*end of debugger crash prevention*/
 
 	//create queues
-	xQueue_I2CEvent = xQueueCreate(10, sizeof(uint32_t));
+	xQueue_I2CEvent = xQueueCreate(10, sizeof(int));
 	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
 	xQueue_Lcd = xQueueCreate(10, sizeof(LcdData)); //TODO: set size
 
@@ -81,7 +81,7 @@ int main(void)
 //	scheduler_add_task(new TestTask());
 //	scheduler_add_task(new LcdPinTestTask());
 	scheduler_add_task(new DisplayTask());
-//	scheduler_add_task(new ExtADCTask());
+	scheduler_add_task(new ExtADCTask());
 	scheduler_add_task(new UsbTask());
 	scheduler_add_task(new UsbHostTask());
 	scheduler_add_task(new KeyboardTask());

@@ -118,6 +118,8 @@ typedef enum
 #define ADC_I2C_SCL_PINSRC GPIO_PinSource8
 #define ADC_I2C_SDA_PINSRC GPIO_PinSource9
 
+static const uint8_t ExtADCAddr = 0x90; //LTC2991 hardware address
+
 //void prvMEMS_Config(void);
 //uint32_t LIS302DL_TIMEOUT_UserCallback(void);
 

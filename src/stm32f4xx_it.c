@@ -29,15 +29,14 @@
 #include "semphr.h"
 #include "queue.h"
 
-#include "hw_config.h"
-
 #include "usb_hcd_int.h"
 #include "usb_bsp.h"
 
-/* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
+#include "hw_config.h"
+#include "DataStructures.h"
+
+#include <stdbool.h>
+
 portBASE_TYPE xHigherPriorityTaskWoken;
 extern xQueueHandle xQueue_I2CEvent;
 extern xQueueHandle xQueue_Keyboard;
@@ -51,10 +50,20 @@ extern USB_OTG_CORE_HANDLE USB_OTG_Core;
 
 extern void UsbTaskToggleEnabled(void);
 
+//Keyboard
 extern uint8_t keyPressed;
 extern void KeyboardTaskResume(void);
 
-/* Private function prototypes -----------------------------------------------*/
+//ADC i2c
+int i2cPointer = 0;
+I2CData i2cData_it[I2C_DATA_SIZE];
+int getI2cPointer(void)
+{
+	i2cPointer++;
+	i2cPointer %= I2C_DATA_SIZE;
+	//	(++i2cPointer) %=I2C_DATA_SIZE; //works only in c++
+	return i2cPointer;
+}
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Exceptions Handlers                         */
@@ -240,11 +249,11 @@ void EXTI9_5_IRQHandler(void)
 	}
 	if (EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
 	{
-//		UsbTaskToggleEnabled(); //TODO: remove
+		//		UsbTaskToggleEnabled(); //TODO: remove
 		xHigherPriorityTaskWoken = pdFALSE;
-		keyPressed |= 1<<KEY_RIGHT;
+		keyPressed |= 1 << KEY_RIGHT;
 		uint8_t *key = &keyPressed;
-		xQueueSendFromISR(xQueue_Keyboard, (void*) &key, &xHigherPriorityTaskWoken); //TODO poiter, references of sth
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken); //TODO poiter, references of sth
 		KeyboardTaskResume();
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		EXTI_ClearITPendingBit(KEY_RIGHT_EXTI_LINE);
@@ -254,26 +263,139 @@ void EXTI9_5_IRQHandler(void)
 void I2C3_ER_IRQHandler(void)
 {
 	//TODO: stub
-
 }
 
 void I2C3_EV_IRQHandler(void)
 {
 	xHigherPriorityTaskWoken = pdFALSE;
-	//I2C_ClearITPendingBit ?? chyba getlastevent to załatwia
-	//
-	//if (EXTI_GetITStatus(EXTI_Line0) != RESET) //FIXME: wrong EXTI_Line
-	//{
-	//xSemaphoreGiveFromISR(xSemaphoreSW,&xHigherPriorityTaskWoken);
-//	unsigned portBASE_TYPE mess = uxQueueMessagesWaiting( xQueue_I2CEvent );
-//	if(mess <10) //TODO: remove this
-//	{
-		uint32_t lastEvent = I2C_GetLastEvent(I2C3);
-		xQueueSendFromISR(xQueue_I2CEvent, (void*) &lastEvent, &xHigherPriorityTaskWoken);
-//	}
+
+	static int index = 0;
+	static bool regSent = false;
+	uint32_t event = I2C_GetLastEvent(I2C3);
+	if ((i2cData_it[i2cPointer].dir) == DirWrite)
+	{
+		switch (event)
+		{
+		// EV5
+		case I2C_EVENT_MASTER_MODE_SELECT:
+			//Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
+			I2C_Send7bitAddress(ADC_I2C, ExtADCAddr, I2C_Direction_Transmitter);
+			break;
+
+			// EV6
+		case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
+			// First byte (register)
+			I2C_SendData(ADC_I2C, i2cData_it[i2cPointer].reg);
+			break;
+
+			// EV8
+		case I2C_EVENT_MASTER_BYTE_TRANSMITTING:
+			if (index < i2cData_it[i2cPointer].length)
+			{
+				//send next bytes
+				I2C_SendData(ADC_I2C, i2cData_it[i2cPointer].val[index++]);
+			}
+			else //FIXME: unnecessary ?
+			{
+				I2C_ITConfig(ADC_I2C, I2C_IT_BUF, DISABLE);
+			}
+			break;
+
+			// EV8_2
+		case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
+			if (index < i2cData_it[i2cPointer].length) //protection for situation where next byte wasn't quick enough
+			{
+				//send next bytes
+				I2C_SendData(ADC_I2C, i2cData_it[i2cPointer].val[index++]);
+				//TODO: add some logging here
+			}
+			else //everything ok
+			{
+				// STOP
+				index = 0;
+				I2C_GenerateSTOP(ADC_I2C, ENABLE);
+				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE); //FIXME: Disable all or only EVT?
+				xQueueSendFromISR(xQueue_I2CEvent, (void* ) &i2cPointer, &xHigherPriorityTaskWoken);
+			}
+			break;
+
+		default:
+			//TODO: show info
+			break;
+		}
+	}
+	else
+	{
+		switch (event)
+		{
+		// EV5
+		case I2C_EVENT_MASTER_MODE_SELECT:
+			if (!regSent)
+			{
+				//Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
+				I2C_Send7bitAddress(ADC_I2C, ExtADCAddr, I2C_Direction_Transmitter);
+				regSent = true;
+			}
+			else
+			{
+				//Send addr in read mode
+				I2C_Send7bitAddress(ADC_I2C, ExtADCAddr, I2C_Direction_Receiver);
+			}
+			break;
+
+			//EV6 in transmitter mode
+		case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
+			// Send register
+			I2C_SendData(ADC_I2C, i2cData_it[i2cPointer].reg);
+			break;
+
+			// EV6 in receiver mode
+		case I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED:
+			//cool story bro :)
+			break;
+
+			// EV8_2
+		case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
+			// Reg sent, change to receiver
+			I2C_GenerateSTART(ADC_I2C, ENABLE);
+			break;
+
+			// EV7
+		case I2C_EVENT_MASTER_BYTE_RECEIVED:
+			//FIXME: possible change in order; optimization needed
+			//first check whether to send ACK (EV7_1)
+			if (index >= (i2cData_it[i2cPointer].length - 1)) // one before last packet
+			{
+				//Disable I2C acknowledgment
+				I2C_AcknowledgeConfig(ADC_I2C, DISABLE);
+				//Send I2C STOP Condition
+				I2C_GenerateSTOP(ADC_I2C, ENABLE);
+			}
+
+			i2cData_it[i2cPointer].val[index++] = I2C_ReceiveData(ADC_I2C);
+
+			if (index >= i2cData_it[i2cPointer].length) //all data received, can ignore rest
+			{
+				index = 0;
+				regSent = false;
+				I2C_ReceiveData(ADC_I2C); //clear data register. flag I2C_SR1_RXNE
+				I2C_ReceiveData(ADC_I2C);
+				I2C_ReceiveData(ADC_I2C);
+				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+				xQueueSendFromISR(xQueue_I2CEvent, (void* ) &i2cPointer, &xHigherPriorityTaskWoken);
+			}
+			break;
+		case 0x40: //FIXME: shouldn't be here!
+			I2C_ReceiveData(ADC_I2C);
+			break;
+		default:
+			//TODO: show info
+			break;
+		}
+	}
 
 	portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
-	//}
+
 }
 
 /**

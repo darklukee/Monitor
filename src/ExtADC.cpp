@@ -27,9 +27,14 @@
 #include "queue.h"
 
 bool ExtADC::GPIO_Configured = false;
-const uint8_t ExtADC::addr = 0x90;
+//const uint8_t ExtADC::addr = 0x90;
 
 extern xQueueHandle xQueue_I2CEvent;
+extern I2CData i2cData_it[I2C_DATA_SIZE];
+extern "C"
+{
+int getI2cPointer();
+}
 
 ExtADC::ExtADC()
 {
@@ -123,7 +128,7 @@ bool ExtADC::config(void)
 	config.val[1] = EXTADC_BIT_V7_8_T | EXTADC_BIT_V7_8_K; //temperature measurement in kelvin
 	config.val[2] = EXTADC_BIT_REPEAT | EXTADC_BIT_TINT_K; //repeat mode, tint in kelvin
 	process(config);
-	if(!verifyI2cWrite(config))
+	if (!verifyI2cWrite(config))
 		return false;
 
 	//enable channels:
@@ -132,8 +137,8 @@ bool ExtADC::config(void)
 	config.reg = EXTADC_REG_CH_EN;
 	config.val[0] = EXTADC_CH_V1_2 | EXTADC_CH_V3_4 | EXTADC_CH_V5_6 | EXTADC_CH_T4; //TODO: Tint and Vcc
 	process(config);
-	if(!verifyI2cWrite(config))
-		return false;
+//	if (!verifyI2cWrite(config)) //bit changes in register
+//		return false;
 
 	return true;
 }
@@ -143,9 +148,6 @@ bool ExtADC::process(I2CData& data)
 
 	I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, ENABLE); //enable interrupts
 	//TODO: empty queue xQueue_I2CEvent
-
-	//Start the config sequence, STOP inside i2cWrite and i2cRead
-	I2C_GenerateSTART(ADC_I2C, ENABLE);
 
 	if (data.dir == DirWrite)
 	{
@@ -163,135 +165,183 @@ bool ExtADC::process(I2CData& data)
 
 void ExtADC::i2cWrite(I2CData &data)
 {
-	uint32_t event;
-	uint8_t index = 0;
-	bool finished = false;
-	while ((xQueueReceive(xQueue_I2CEvent, &event, portMAX_DELAY) == pdPASS) && (!finished)) //TODO: delay time
+	int it = getI2cPointer();
+	int itCheck = -1; //to check if correct request was completed
+	copyI2cData(&data,&(i2cData_it[it])); //	i2cData_it[it] = data;
+	//Start the config sequence, STOP inside irq handler
+	I2C_GenerateSTART(ADC_I2C, ENABLE);
+	//peek from queue, compare whether completed or error
+	bool ok = false;
+	while (!ok)
 	{
-		switch (event)
+		if (xQueueReceive(xQueue_I2CEvent, &itCheck, portMAX_DELAY) == pdPASS)
 		{
-		// EV5
-		case I2C_EVENT_MASTER_MODE_SELECT:
-			//Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
-			I2C_Send7bitAddress(ADC_I2C, addr, I2C_Direction_Transmitter);
-			break;
-
-			// EV6
-		case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
-			// First byte (register)
-			I2C_SendData(ADC_I2C, data.reg);
-			break;
-
-			// EV8
-		case I2C_EVENT_MASTER_BYTE_TRANSMITTING:
-			if (index < data.length)
-			{
-				//send next bytes
-				I2C_SendData(ADC_I2C, data.val[index++]);
-			}
-//			else //FIXME: unnecessary ?
-//			{
-//				I2C_ITConfig(ADC_I2C, I2C_IT_BUF, DISABLE);
-//			}
-			break;
-
-			// EV8_2
-		case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
-			if (index < data.length) //protection for situation where next byte wasn't quick enough
-			{
-				//send next bytes
-				I2C_SendData(ADC_I2C, data.val[index++]);
-				//TODO: add some logging here
-			}
-			else //everything ok
-			{
-				// STOP
-				I2C_GenerateSTOP(ADC_I2C, ENABLE);
-				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE); //FIXME: Disable all or only EVT?
-				finished = true;
-			}
-			break;
-
-		default:
-			//TODO: show info
-			break;
+			if (itCheck == it)
+				ok = true;
 		}
 	}
+
+	/*
+	 uint32_t event;
+	 uint8_t index = 0;
+	 bool finished = false;
+	 while ((xQueueReceive(xQueue_I2CEvent, &event, portMAX_DELAY) == pdPASS) && (!finished)) //TODO: delay time
+	 {
+	 switch (event)
+	 {
+	 // EV5
+	 case I2C_EVENT_MASTER_MODE_SELECT:
+	 //Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
+	 I2C_Send7bitAddress(ADC_I2C, addr, I2C_Direction_Transmitter);
+	 break;
+
+	 // EV6
+	 case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
+	 // First byte (register)
+	 I2C_SendData(ADC_I2C, data.reg);
+	 break;
+
+	 // EV8
+	 case I2C_EVENT_MASTER_BYTE_TRANSMITTING:
+	 if (index < data.length)
+	 {
+	 //send next bytes
+	 I2C_SendData(ADC_I2C, data.val[index++]);
+	 }
+	 //			else //FIXME: unnecessary ?
+	 //			{
+	 //				I2C_ITConfig(ADC_I2C, I2C_IT_BUF, DISABLE);
+	 //			}
+	 break;
+
+	 // EV8_2
+	 case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
+	 if (index < data.length) //protection for situation where next byte wasn't quick enough
+	 {
+	 //send next bytes
+	 I2C_SendData(ADC_I2C, data.val[index++]);
+	 //TODO: add some logging here
+	 }
+	 else //everything ok
+	 {
+	 // STOP
+	 I2C_GenerateSTOP(ADC_I2C, ENABLE);
+	 I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE); //FIXME: Disable all or only EVT?
+	 finished = true;
+	 }
+	 break;
+
+	 default:
+	 //TODO: show info
+	 break;
+	 }
+	 }
+	 */
 	return;
 }
 
 void ExtADC::i2cRead(I2CData &data)
 {
-
-	uint32_t event;
-	uint8_t index = 0;
-	bool regSent = false;
-	bool finished = false;
+	int it = getI2cPointer();
+	int itCheck = -1; //to check if correct request was completed
+	copyI2cData(&data,&(i2cData_it[it]));
+//Start the config sequence, STOP inside irq handler
+	I2C_GenerateSTART(ADC_I2C, ENABLE);
 	I2C_AcknowledgeConfig(ADC_I2C, ENABLE);
-	while ((xQueueReceive(xQueue_I2CEvent, &event, portMAX_DELAY) == pdPASS) && (!finished)) //TODO: delay time
+//peek from queue, compare whether completed or error
+	bool ok = false;
+	while (!ok)
 	{
-		switch (event)
+		if (xQueueReceive(xQueue_I2CEvent, &itCheck, portMAX_DELAY) == pdPASS)
 		{
-		// EV5
-		case I2C_EVENT_MASTER_MODE_SELECT:
-			if (!regSent)
+			if (itCheck == it)
 			{
-				//Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
-				I2C_Send7bitAddress(ADC_I2C, addr, I2C_Direction_Transmitter);
-				regSent = true;
+				ok = true;
+				//data = i2cData_it[it]; //TODO: manual copy val would be faster
+				copyI2cData(&(i2cData_it[it]), &data);
 			}
-			else
-			{
-				//Send addr in read mode
-				I2C_Send7bitAddress(ADC_I2C, addr, I2C_Direction_Receiver);
-			}
-			break;
-
-			//EV6 in transmitter mode
-		case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
-			// Send register
-			I2C_SendData(ADC_I2C, data.reg);
-			break;
-
-			// EV6 in receiver mode
-		case I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED:
-			//cool story bro :)
-			break;
-
-			// EV8_2
-		case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
-			// Reg sent, change to receiver
-			I2C_GenerateSTART(ADC_I2C, ENABLE);
-			break;
-
-			// EV7
-		case I2C_EVENT_MASTER_BYTE_RECEIVED:
-			//FIXME: possible change in order; optimization needed
-			//first check whether to send ACK (EV7_1)
-			if (index >= (data.length - 1)) // one before last packet
-			{
-				/* Disable I2C acknowledgment */
-				I2C_AcknowledgeConfig(ADC_I2C, DISABLE);
-				/* Send I2C STOP Condition */
-				I2C_GenerateSTOP(ADC_I2C, ENABLE);
-			}
-
-			data.val[index++] = I2C_ReceiveData(ADC_I2C);
-
-			if (index >= data.length) //all data received, can ignore rest
-			{
-				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
-				finished = true;
-			}
-			break;
-
-		default:
-			//TODO: show info
-			break;
 		}
 	}
 
+	/*
+	 uint32_t event;
+	 uint8_t index = 0;
+	 bool regSent = false;
+	 bool finished = false;
+	 I2C_AcknowledgeConfig(ADC_I2C, ENABLE);
+	 while ((xQueueReceive(xQueue_I2CEvent, &event, portMAX_DELAY) == pdPASS) && (!finished)) //TODO: delay time
+	 {
+	 switch (event)
+	 {
+	 // EV5
+	 case I2C_EVENT_MASTER_MODE_SELECT:
+	 if (!regSent)
+	 {
+	 //Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
+	 I2C_Send7bitAddress(ADC_I2C, addr, I2C_Direction_Transmitter);
+	 regSent = true;
+	 }
+	 else
+	 {
+	 //Send addr in read mode
+	 I2C_Send7bitAddress(ADC_I2C, addr, I2C_Direction_Receiver);
+	 }
+	 break;
+
+	 //EV6 in transmitter mode
+	 case I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED:
+	 // Send register
+	 I2C_SendData(ADC_I2C, data.reg);
+	 break;
+
+	 // EV6 in receiver mode
+	 case I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED:
+	 //cool story bro :)
+	 break;
+
+	 // EV8_2
+	 case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
+	 // Reg sent, change to receiver
+	 I2C_GenerateSTART(ADC_I2C, ENABLE);
+	 break;
+
+	 // EV7
+	 case I2C_EVENT_MASTER_BYTE_RECEIVED:
+	 //FIXME: possible change in order; optimization needed
+	 //first check whether to send ACK (EV7_1)
+	 if (index >= (data.length - 1)) // one before last packet
+	 {
+	 //Disable I2C acknowledgment
+	 I2C_AcknowledgeConfig(ADC_I2C, DISABLE);
+	 //Send I2C STOP Condition
+	 I2C_GenerateSTOP(ADC_I2C, ENABLE);
+	 }
+
+	 data.val[index++] = I2C_ReceiveData(ADC_I2C);
+
+	 if (index >= data.length) //all data received, can ignore rest
+	 {
+	 I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
+	 finished = true;
+	 }
+	 break;
+
+	 default:
+	 //TODO: show info
+	 break;
+	 }
+	 }
+	 */
 	return;
+}
+
+void ExtADC::copyI2cData(I2CData* src, I2CData* dest)
+{
+	dest->dir = src->dir;
+	dest->length = src->length;
+	dest->reg = src->reg;
+	for (int i = 0; i < src->length; i++)
+		dest->val[i] = src->val[i];
 }
 
 uint8_t ExtADC::getStatus(void)
@@ -306,7 +356,8 @@ uint8_t ExtADC::getStatus(void)
 
 bool ExtADC::getData(I2CData& data)
 {
-
+	process(data);
+	return true;
 }
 
 bool ExtADC::verifyI2cWrite(I2CData& data)
@@ -317,10 +368,10 @@ bool ExtADC::verifyI2cWrite(I2CData& data)
 	verify.length = data.length;
 
 	process(verify);
-	for(int i =0; i<data.length; i++)
-		{
-			if(verify.val[i] != data.val[i])
-				return false;
-		}
+	for (int i = 0; i < data.length; i++)
+	{
+		if (verify.val[i] != data.val[i])
+			return false;
+	}
 	return true;
 }

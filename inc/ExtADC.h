@@ -24,29 +24,7 @@
 #define EXTADC_H_
 
 #include "stm32f4xx.h"
-
-enum Dir
-{
-	DirWrite = 0, DirRead = !DirWrite
-};
-
-const uint8_t maxI2cBuff = 8;
-typedef uint8_t i2cBuff[maxI2cBuff]; //FIXME: may be not enough
-
-struct I2CData
-{
-	i2cBuff val;
-	Dir dir;
-	uint8_t reg;
-	uint8_t length;
-};
-
-struct AdcData
-{
-	uint8_t values[20];
-	uint8_t length;
-	uint8_t stat;
-};
+#include "DataStructures.h"
 
 class ExtADC
 {
@@ -63,11 +41,12 @@ public:
 private:
 	void i2cWrite(I2CData &data);
 	void i2cRead(I2CData &data);
+	void copyI2cData(I2CData *src, I2CData *dest);
 
 	bool verifyI2cWrite(I2CData &data);
 
 	static bool GPIO_Configured;
-	static const uint8_t addr; //LTC2991 hardware address
+//	static const uint8_t addr; //LTC2991 hardware address
 };
 
 //generic registers; use with length > 1

@@ -56,9 +56,9 @@ bool ExtADCTask::run(void *param)
 		//TODO: get only values that are available  (based ona stat)
 		//TODO: reduce data payload by getting only necessary fields
 
-		receiveBuffer[0].length = maxI2cBuff;
+		receiveBuffer[0].length = I2C_BUFF_SIZE;
 		receiveBuffer[0].reg = EXTADC_REG_V1;
-		receiveBuffer[1].length = maxI2cBuff;
+		receiveBuffer[1].length = I2C_BUFF_SIZE;
 		receiveBuffer[1].reg = EXTADC_REG_V5;
 		receiveBuffer[2].length = 4;
 		receiveBuffer[2].reg = EXTADC_REG_TINT;
