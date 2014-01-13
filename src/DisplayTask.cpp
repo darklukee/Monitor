@@ -66,7 +66,7 @@ bool DisplayTask::run(void *param)
 	if (xQueueReceive(xQueue_Lcd, &values, 0)) //TODO: take only latest data and discard rest
 	{
 		GLCD.CursorTo(0, 0);
-		printf("Voltage: %6f mV\nCurrent: %6f mA\n", values.voltage, values.current);
+		printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n", values.voltage, values.current);
 //		fflush(stdout);
 	}
 
