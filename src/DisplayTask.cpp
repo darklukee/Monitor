@@ -57,23 +57,36 @@ bool DisplayTask::taskEntry()
 //	GLCD.DefineArea(0,0,127,63);
 
 	initiated = true;
+	GLCD.CursorTo(0, 0);
+	printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n", 0, 0);
+
 	return true;
 }
 
 bool DisplayTask::run(void *param)
 {
+	static int i = 0;
 	LcdData values;
-	if (xQueueReceive(xQueue_Lcd, &values, 0)) //TODO: take only latest data and discard rest
+	if (xQueueReceive(xQueue_Lcd, &values, 0))
 	{
-		GLCD.CursorTo(0, 0);
-		printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n", values.voltage, values.current);
-//		fflush(stdout);
+		if (uxQueueMessagesWaiting(xQueue_Lcd) > 2)
+			xQueueReset(xQueue_Lcd); //discard old values
+		GLCD.CursorTo(9, 0);
+		//printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n%d\n", values.voltage, values.current, i);
+		printf("%8.3f", values.voltage);
+		fflush(stdout);
+		GLCD.CursorTo(9, 1);
+		printf("%8.3f", values.current);
+		fflush(stdout);
+		GLCD.CursorTo(0, 2);
+		printf("%d", i);
+		fflush(stdout);
 	}
 
-	static int i = 0;
-	GLCD.CursorTo(0, 7);
-	printf("status: %d", i++);
+	GLCD.CursorTo(17, 7);
+	printf("%4d", i++);
 	fflush(stdout);
+	GLCD.CursorTo(0, 2);
 	//Demo();
 
 //	vTaskSuspend(this->getTaskHandle());

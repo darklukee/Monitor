@@ -26,8 +26,8 @@
 extern xQueueHandle xQueue_Lcd;
 extern xQueueHandle xQueue_AdcData;
 
-const float VoltageLsb = 2500 / 8192; //0.30518[mV]; 2500mV/2^13; LTC2991 application information
-const float CurrentLsb = 2500 / 131072; //0.019075[mV]; 2500mV/2^17; LTC2991 application information
+const float VoltageLsb = 0.30518; //2500.0 / 8192.0; //0.30518[mV]; 2500mV/2^13; LTC2991 application information
+const float CurrentLsb = 0.019075; //2500.0 / 131072.0; //0.019075[mV]; 2500mV/2^17; LTC2991 application information
 const float Resistance = 0.39;
 
 CalculatorTask::CalculatorTask() :
@@ -63,7 +63,17 @@ bool CalculatorTask::run(void *param)
 			bool sign = (data.values[2] & (1 << 6)) != 0; //if 1 then -
 			data.values[2] = data.values[2] & (0b00111111); //clear data valid and sign
 			uint16_t currentRaw = (data.values[2] << 8) + data.values[3];
-			float current = float(sign ? -currentRaw : currentRaw) * CurrentLsb / Resistance;
+			float current;
+			if (sign)
+			{
+				currentRaw = ~(currentRaw | (0xff << 14)) + 1; //bit inversion
+				current = -float(currentRaw);
+			}
+			else
+			{
+				current = float(currentRaw);
+			}
+			current *= (CurrentLsb / Resistance); //TODO: overflow?
 			addCurrent(current);
 		}
 		if (data.stat & (1 << 2)) //V3
@@ -72,7 +82,12 @@ bool CalculatorTask::run(void *param)
 			bool sign = (data.values[4] & (1 << 6)) != 0; //if 1 then -
 			data.values[4] = data.values[4] & (0b00111111); //clear data valid and sign
 			uint16_t voltageRaw = (data.values[4] << 8) + data.values[5];
-			float voltage = float(sign ? -voltageRaw : voltageRaw) * VoltageLsb;
+			float voltage;
+			if (sign)
+				voltage = -float(voltageRaw);
+			else
+				voltage = float(voltageRaw);
+			voltage *= VoltageLsb;
 			addVoltage(voltage);
 		}
 		sendToLcd();
@@ -94,15 +109,15 @@ float CalculatorTask::addVoltage(float voltage)
 	voltageTabPt %= tabSize;
 	voltageTab[voltageTabPt] = voltage;
 
-	if(voltageTabPt == 0) //wyliczamy srednia co tabSize
+	if (voltageTabPt == 0) //wyliczamy srednia co tabSize
 	{
 		dataToLcd = true;
-		float voltageTemp=0;
-		for(int i = 0; i<tabSize; i++)
+		float voltageTemp = 0;
+		for (int i = 0; i < tabSize; i++)
 		{
 			voltageTemp += voltageTab[i];
 		}
-		voltageMean = voltageTemp/tabSize;
+		voltageMean = voltageTemp / tabSize;
 	}
 
 	return voltageMean;
@@ -119,15 +134,15 @@ float CalculatorTask::addCurrent(float current)
 	currentTabPt %= tabSize;
 	currentTab[currentTabPt] = current;
 
-	if(currentTabPt == 0) //wyliczamy srednia co tabSize
+	if (currentTabPt == 0) //wyliczamy srednia co tabSize
 	{
 		dataToLcd = true;
-		float currentTemp=0;
-		for(int i = 0; i<tabSize; i++)
+		float currentTemp = 0;
+		for (int i = 0; i < tabSize; i++)
 		{
 			currentTemp += currentTab[i];
 		}
-		currentMean = currentTemp/tabSize;
+		currentMean = currentTemp / tabSize;
 	}
 
 	return currentMean;
@@ -140,12 +155,13 @@ float CalculatorTask::getCurrentMean(void)
 
 void CalculatorTask::sendToLcd(void)
 {
-	if(dataToLcd)
+	if (dataToLcd)
 	{
 		LcdData outputData;
 		outputData.voltage = voltageMean;
 		outputData.current = currentMean;
-		xQueueSend(xQueue_Lcd, (void * ) &outputData, (portTickType ) 0);
+		xQueueSendToFront(xQueue_Lcd, (void * ) &outputData, (portTickType ) 0);
+		dataToLcd = false;
 	}
 }
 
