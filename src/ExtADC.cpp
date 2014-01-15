@@ -128,8 +128,8 @@ bool ExtADC::config(void)
 	config.val[1] = EXTADC_BIT_V7_8_T | EXTADC_BIT_V7_8_K; //temperature measurement in kelvin
 	config.val[2] = EXTADC_BIT_REPEAT | EXTADC_BIT_TINT_K; //repeat mode, tint in kelvin
 	process(config);
-	if (!verifyI2cWrite(config))
-		return false;
+//	if (!verifyI2cWrite(config))
+//		return false;
 
 	//enable channels:
 	config.dir = DirWrite;
@@ -247,7 +247,8 @@ void ExtADC::i2cRead(I2CData &data)
 	copyI2cData(&data,&(i2cData_it[it]));
 //Start the config sequence, STOP inside irq handler
 	I2C_GenerateSTART(ADC_I2C, ENABLE);
-	I2C_AcknowledgeConfig(ADC_I2C, ENABLE);
+//	I2C_AcknowledgeConfig(ADC_I2C, ENABLE);
+	I2C_AcknowledgeConfig(ADC_I2C, DISABLE); // make sure it's disabled
 //peek from queue, compare whether completed or error
 	bool ok = false;
 	while (!ok)

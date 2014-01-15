@@ -263,6 +263,39 @@ void EXTI9_5_IRQHandler(void)
 void I2C3_ER_IRQHandler(void)
 {
 	//TODO: stub
+	volatile uint32_t SR1Register, SR2Register;
+	/* Read the I2C1 status register */
+	SR1Register = ADC_I2C->SR1;
+	if (SR1Register & 0x0F00)
+	{ //an error
+		//error = true;
+		// I2C1error.error = ((SR1Register & 0x0F00) >> 8);        //save error
+		// I2C1error.job = job;    //the task
+	}
+	/* If AF, BERR or ARLO, abandon the current job and commence new if there are jobs */
+	if (SR1Register & 0x0700)
+	{
+		SR2Register = ADC_I2C->SR2; //read second status register to clear ADDR if it is set (note that BTF will not be set after a NACK)
+		I2C_ITConfig(ADC_I2C, I2C_IT_BUF, DISABLE); //disable the RXNE/TXE interrupt - prevent the ISR tailchaining onto the ER (hopefully)
+		if (!(SR1Register & 0x0200) && !(ADC_I2C->CR1 & 0x0200))
+		{ //if we dont have an ARLO error, ensure sending of a stop
+			if (ADC_I2C->CR1 & 0x0100)
+			{ //We are currently trying to send a start, this is very bad as start,stop will hang the peripheral
+				while (ADC_I2C->CR1 & 0x0100)
+					; //wait for any start to finish sending
+				I2C_GenerateSTOP(ADC_I2C, ENABLE); //send stop to finalise bus transaction
+				while (ADC_I2C->CR1 & 0x0200)
+					; //wait for stop to finish sending
+//				i2cInit(ADC_I2C); //reset and configure the hardware//TODO: add
+			}
+			else
+			{
+				I2C_GenerateSTOP(ADC_I2C, ENABLE); //stop to free up the bus
+				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR, DISABLE); //Disable EVT and ERR interrupts while bus inactive
+			}
+		}
+	}
+	ADC_I2C->SR1 &= ~0x0F00; //reset all the error bits to clear the interrupt
 }
 
 void I2C3_EV_IRQHandler(void)
@@ -358,6 +391,8 @@ void I2C3_EV_IRQHandler(void)
 		case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
 			// Reg sent, change to receiver
 			I2C_GenerateSTART(ADC_I2C, ENABLE);
+			if (i2cData_it[i2cPointer].length > 1)
+				I2C_AcknowledgeConfig(ADC_I2C, ENABLE);
 			break;
 
 			// EV7
@@ -378,9 +413,12 @@ void I2C3_EV_IRQHandler(void)
 			{
 				index = 0;
 				regSent = false;
+				ITStatus st = I2C_GetITStatus(ADC_I2C, I2C_IT_RXNE);
+				st = I2C_GetITStatus(ADC_I2C, I2C_IT_RXNE);
 				I2C_ReceiveData(ADC_I2C); //clear data register. flag I2C_SR1_RXNE
-				I2C_ReceiveData(ADC_I2C);
-				I2C_ReceiveData(ADC_I2C);
+				st = I2C_GetITStatus(ADC_I2C, I2C_IT_RXNE);
+//				I2C_ReceiveData(ADC_I2C);
+//				I2C_ReceiveData(ADC_I2C);
 				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 				xQueueSendFromISR(xQueue_I2CEvent, (void* ) &i2cPointer, &xHigherPriorityTaskWoken);
 			}

@@ -51,6 +51,7 @@ bool ExtADCTask::taskEntry()
 bool ExtADCTask::run(void *param)
 {
 	uint8_t stat = extADC.getStatus();
+	vTaskDelay(25);
 	if (stat != 0)
 	{
 		//TODO: get only values that are available  (based ona stat)
@@ -66,6 +67,7 @@ bool ExtADCTask::run(void *param)
 		for (int i = 0; i < maxReceiveBuffer; i++)
 		{
 			extADC.getData(receiveBuffer[i]);
+			vTaskDelay(25);
 		}
 
 		AdcData outputData;
@@ -93,6 +95,9 @@ bool ExtADCTask::run(void *param)
 		xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
 	}
 
-	taskYIELD(); //task is going to ready state to allow next one to run
+//	taskYIELD(); //task is going to ready state to allow next one to run
+	vTaskDelay(10);
+	//TODO: add delay, according to received data
+
 	return true;
 }
