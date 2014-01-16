@@ -55,6 +55,8 @@ xQueueHandle xQueue_I2CEvent;
 xQueueHandle xQueue_AdcData;
 //glcd
 xQueueHandle xQueue_Lcd;
+//usb
+xQueueHandle xQueue_Storage;
 
 int main(void)
 {
@@ -70,9 +72,10 @@ int main(void)
 	/*end of debugger crash prevention*/
 
 	//create queues
-	xQueue_I2CEvent = xQueueCreate(10, sizeof(int));
+	xQueue_I2CEvent = xQueueCreate(3, sizeof(int));
 	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
-	xQueue_Lcd = xQueueCreate(10, sizeof(LcdData)); //TODO: set size
+	xQueue_Lcd = xQueueCreate(5, sizeof(LcdData));
+	xQueue_Storage = xQueueCreate(10, sizeof(StorageData));
 
 	/* initialize hardware... */
 	prvSetupHardware();

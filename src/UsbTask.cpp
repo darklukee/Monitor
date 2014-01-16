@@ -23,6 +23,10 @@
 #include <stdio.h>
 #include <string.h>
 #include "usbh_usr.h"
+#include "DataStructures.h"
+
+extern xQueueHandle xQueue_Storage;
+
 bool UsbTask::connected = false;
 bool UsbTask::enabled = true;
 
@@ -53,9 +57,10 @@ bool UsbTask::run(void *param)
 	switch (state)
 	{
 	case UsbTaskInit:
-		if (connected && enabled)
+		if (isOk())
 		{
-			vTaskDelay(OS_MS(100)); //TODO: necessary?
+			vTaskDelay(OS_MS(100));
+			//TODO: dynamic filename, csv header
 			fr = f_open(&file, fileName, FA_CREATE_ALWAYS | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
 			if (fr == FR_OK)
 				state = UsbTaskRun;
@@ -66,19 +71,38 @@ bool UsbTask::run(void *param)
 		}
 		break;
 	case UsbTaskRun:
-		if (connected && enabled)
+		if (isOk())
 		{
-			const unsigned int size = 128;
-			char buf[size];
-			unsigned int len = sprintf(buf, "Test Write. time: %.3f, iter: %d\n", double(freq*iter)/1000, iter);
-			if(len<=size)
-				fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
-			if (fr != FR_OK || bw < len)
+			StorageData data;
+			while (xQueueReceive(xQueue_Storage, &data, 10) && isOk()) //wait for 10 ticks
 			{
-				state = UsbTaskDeInit;
-				setEnabled(false);
+				const unsigned int size = 40;
+				char buf[size];
+				static int iter = 0;
+				unsigned int len = sprintf(buf, "%d,%f,%f,%d\r\n", iter++, data.voltage, data.current,
+					uxQueueMessagesWaiting(xQueue_Storage));
+				if (len <= size)
+				{
+					fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
+					if (fr != FR_OK || bw < len)
+					{
+						state = UsbTaskDeInit;
+						setEnabled(false);
+					}
+				}
 			}
-			vTaskDelay(OS_MS(freq));
+
+//			const unsigned int size = 128;
+//			char buf[size];
+//			unsigned int len = sprintf(buf, "Test Write. time: %.3f, iter: %d\n", double(freq*iter)/1000, iter);
+//			if(len<=size)
+//				fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
+//			if (fr != FR_OK || bw < len)
+//			{
+//				state = UsbTaskDeInit;
+//				setEnabled(false);
+//			}
+//			vTaskDelay(OS_MS(freq));
 		}
 		else
 		{
@@ -98,30 +122,30 @@ bool UsbTask::run(void *param)
 	return true;
 }
 
-bool UsbTask::isConnected()
-{
-	return connected;
-}
-
-void UsbTask::setConnected(bool _connected)
-{
-	connected = _connected;
-}
-
-bool UsbTask::isEnabled()
-{
-	return enabled;
-}
-
-void UsbTask::setEnabled(bool _enabled)
-{
-	enabled = _enabled;
-}
-
-void UsbTask::toggleEnabled()
-{
-	enabled ^= true;
-}
+//bool UsbTask::isConnected()
+//{
+//	return connected;
+//}
+//
+//void UsbTask::setConnected(bool _connected)
+//{
+//	connected = _connected;
+//}
+//
+//bool UsbTask::isEnabled()
+//{
+//	return enabled;
+//}
+//
+//void UsbTask::setEnabled(bool _enabled)
+//{
+//	enabled = _enabled;
+//}
+//
+//void UsbTask::toggleEnabled()
+//{
+//	enabled ^= true;
+//}
 
 //C extern functions wrappers
 extern "C"
@@ -131,4 +155,3 @@ void UsbTaskToggleEnabled()
 	UsbTask::toggleEnabled();
 }
 }
-

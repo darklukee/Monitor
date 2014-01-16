@@ -106,7 +106,7 @@ void ExtADC::init(void)
 
 	// I2C EV Interrupt
 	NVIC_InitStructure.NVIC_IRQChannel = I2C3_EV_IRQn;
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 15; //highest priotiry
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 15; //lowest priotiry
 	NVIC_Init(&NVIC_InitStructure);
 
 	return;

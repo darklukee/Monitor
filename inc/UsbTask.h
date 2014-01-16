@@ -36,13 +36,35 @@ enum UsbTaskState
 class UsbTask: public scheduler_task
 {
 public:
-	UsbTask();bool init();bool taskEntry();bool run(void *param);
+	UsbTask();
+	bool init();
+	bool taskEntry();
+	bool run(void *param);
 
-	static bool isConnected();
-	static void setConnected(bool);
-	static bool isEnabled();
-	static void setEnabled(bool);
-	static void toggleEnabled(void);
+	static bool isConnected(void)
+	{
+		return connected;
+	}
+	static void setConnected(bool _connected)
+	{
+		connected = _connected;
+	}
+	static bool isEnabled(void)
+	{
+		return enabled;
+	}
+	static void setEnabled(bool _enabled)
+	{
+		enabled = _enabled;
+	}
+	static void toggleEnabled(void)
+	{
+		enabled ^= true;
+	}
+	static bool isOk(void)
+	{
+		return enabled && connected;
+	}
 
 private:
 	int iter;

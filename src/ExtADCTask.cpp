@@ -46,6 +46,7 @@ bool ExtADCTask::init()
 bool ExtADCTask::taskEntry()
 {
 	return extADC.config(); //TODO: setup LTC2991 for measurement
+//	vTaskDelayMs(100);
 }
 
 bool ExtADCTask::run(void *param)
@@ -67,12 +68,13 @@ bool ExtADCTask::run(void *param)
 		for (int i = 0; i < maxReceiveBuffer; i++)
 		{
 			extADC.getData(receiveBuffer[i]);
-			vTaskDelay(25);
+//			vTaskDelay(25);
 		}
 
 		AdcData outputData;
 		outputData.length = receiveBuffer[0].length + receiveBuffer[1].length + receiveBuffer[2].length;
-		outputData.stat = stat;
+//		outputData.stat = stat;
+		outputData.stat = 0xff; //TODO: remove of replace
 		//TODO: add time stamp
 
 		int j = 0;

@@ -28,7 +28,7 @@ struct LcdData
 {
 	float voltage;
 	float current;
-//	auto time; //TODO: add time and others
+//	auto timeStamp; //TODO: add time and others
 };
 
 typedef enum
@@ -55,4 +55,10 @@ struct AdcData
 	uint8_t stat;
 };
 
+struct StorageData
+{
+	float voltage;
+	float current;
+//	auto timeStamp; //TODO: add time and others
+};
 #endif /* DATASTRUCTURES_H_ */
