@@ -387,6 +387,11 @@ void I2C3_EV_IRQHandler(void)
 			//cool story bro :)
 			break;
 
+			// EV8
+		case I2C_EVENT_MASTER_BYTE_TRANSMITTING:
+			//sending register. ignore
+			break;
+
 			// EV8_2
 		case I2C_EVENT_MASTER_BYTE_TRANSMITTED:
 			// Reg sent, change to receiver
@@ -397,12 +402,14 @@ void I2C3_EV_IRQHandler(void)
 
 			// EV7
 		case I2C_EVENT_MASTER_BYTE_RECEIVED:
-			//FIXME: possible change in order; optimization needed
 			//first check whether to send ACK (EV7_1)
-			if (index >= (i2cData_it[i2cPointer].length - 1)) // one before last packet
+			if (index >= (i2cData_it[i2cPointer].length - 2)) // two before last packet
 			{
 				//Disable I2C acknowledgment
 				I2C_AcknowledgeConfig(ADC_I2C, DISABLE);
+			}
+			if (index >= (i2cData_it[i2cPointer].length - 1)) // one before last packet
+			{
 				//Send I2C STOP Condition
 				I2C_GenerateSTOP(ADC_I2C, ENABLE);
 			}
@@ -413,18 +420,12 @@ void I2C3_EV_IRQHandler(void)
 			{
 				index = 0;
 				regSent = false;
-				ITStatus st = I2C_GetITStatus(ADC_I2C, I2C_IT_RXNE);
-				st = I2C_GetITStatus(ADC_I2C, I2C_IT_RXNE);
-				I2C_ReceiveData(ADC_I2C); //clear data register. flag I2C_SR1_RXNE
-				st = I2C_GetITStatus(ADC_I2C, I2C_IT_RXNE);
-//				I2C_ReceiveData(ADC_I2C);
-//				I2C_ReceiveData(ADC_I2C);
+				I2C_ReceiveData(ADC_I2C); //TODO: check! clear data register. flag I2C_SR1_RXNE
 				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 				xQueueSendFromISR(xQueue_I2CEvent, (void* ) &i2cPointer, &xHigherPriorityTaskWoken);
 			}
 			break;
 		case 0x40: //FIXME: shouldn't be here!
-			I2C_ReceiveData(ADC_I2C);
 			break;
 		default:
 			//TODO: show info
