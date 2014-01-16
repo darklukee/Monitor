@@ -24,8 +24,6 @@
 
 #include <cpp_task.hpp>
 
-const uint16_t tabSize = 50;
-
 class CalculatorTask: public scheduler_task
 {
 public:
@@ -35,6 +33,7 @@ public:
 	bool run(void *param);
 
 private:
+	static const uint16_t tabSize = 10;
 	float voltageTab[tabSize];
 	float voltageMean;
 	uint16_t voltageTabPt;
@@ -52,6 +51,10 @@ private:
 	void sendToLcd(void);
 //	bool dataToStorage;
 	void sendToStorage(void);
+
+	static const float VoltageLsb = 0.30518; //2500.0 / 8192.0; //0.30518[mV]; 2500mV/2^13; LTC2991 application information
+	static const float CurrentLsb = 0.019075; //2500.0 / 131072.0; //0.019075[mV]; 2500mV/2^17; LTC2991 application information
+	static const float Resistance = 0.39;
 
 };
 

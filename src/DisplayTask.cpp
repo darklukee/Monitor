@@ -49,7 +49,7 @@ bool DisplayTask::init()
 
 bool DisplayTask::taskEntry()
 {
-	this->setFrequency(500); //500ms
+	this->setFrequency(200); //200ms
 //	GLCD.Init(INVERTED);
 	GLCD.Init();
 	GLCD.ClearScreen();
@@ -58,7 +58,7 @@ bool DisplayTask::taskEntry()
 
 	initiated = true;
 	GLCD.CursorTo(0, 0);
-	printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n", 0, 0);
+	printf("Voltage:% 10.3f mV\nCurrent:% 10.3f mA\n", 0, 0);
 
 	return true;
 }
@@ -71,20 +71,20 @@ bool DisplayTask::run(void *param)
 	{
 		if (uxQueueMessagesWaiting(xQueue_Lcd) > 2)
 			xQueueReset(xQueue_Lcd); //discard old values
-		GLCD.CursorTo(9, 0);
+		GLCD.CursorTo(8, 0);
 		//printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n%d\n", values.voltage, values.current, i);
-		printf("%8.3f", values.voltage);
+		printf("% 10.3f", values.voltage);
 		fflush(stdout);
-		GLCD.CursorTo(9, 1);
-		printf("%8.3f", values.current);
+		GLCD.CursorTo(8, 1);
+		printf("% 10.3f", values.current);
 		fflush(stdout);
 		GLCD.CursorTo(0, 2);
 		printf("%d", i);
 		fflush(stdout);
 	}
 
-	GLCD.CursorTo(17, 7);
-	printf("%4d", i++);
+	GLCD.CursorTo(21-6, 7);
+	printf("%6d", i++);
 	fflush(stdout);
 	GLCD.CursorTo(0, 2);
 	//Demo();

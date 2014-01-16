@@ -21,14 +21,12 @@
  */
 #include <CalculatorTask.h>
 #include "ExtADC.h"
+#include "UsbTask.h"
 #include "DataStructures.h"
 
 extern xQueueHandle xQueue_Lcd;
 extern xQueueHandle xQueue_AdcData;
-
-const float VoltageLsb = 0.30518; //2500.0 / 8192.0; //0.30518[mV]; 2500mV/2^13; LTC2991 application information
-const float CurrentLsb = 0.019075; //2500.0 / 131072.0; //0.019075[mV]; 2500mV/2^17; LTC2991 application information
-const float Resistance = 0.39;
+extern xQueueHandle xQueue_Storage;
 
 CalculatorTask::CalculatorTask() :
 	scheduler_task("CalculatorTask", 1024, PRIORITY_LOW, NULL)
@@ -60,35 +58,41 @@ bool CalculatorTask::run(void *param)
 		if (data.stat & (1 << 1)) //V1-V2
 		{
 			bool dataValid = (data.values[2] & (1 << 7)) != 0; //TODO: do something about this
-			bool sign = (data.values[2] & (1 << 6)) != 0; //if 1 then -
-			data.values[2] = data.values[2] & (0b00111111); //clear data valid and sign
-			uint16_t currentRaw = (data.values[2] << 8) + data.values[3];
-			float current;
-			if (sign)
+			if (dataValid)
 			{
-				currentRaw = ~(currentRaw | (0xff << 14)) + 1; //bit inversion
-				current = -float(currentRaw);
+				bool sign = (data.values[2] & (1 << 6)) != 0; //if 1 then -
+				data.values[2] = data.values[2] & (0b00111111); //clear data valid and sign
+				uint16_t currentRaw = (data.values[2] << 8) + data.values[3];
+				float current;
+				if (sign)
+				{
+					currentRaw = ~(currentRaw | (0xff << 14)) + 1; //bit inversion
+					current = -float(currentRaw);
+				}
+				else
+				{
+					current = float(currentRaw);
+				}
+				current *= (CurrentLsb / Resistance); //TODO: overflow?
+				addCurrent(current);
 			}
-			else
-			{
-				current = float(currentRaw);
-			}
-			current *= (CurrentLsb / Resistance); //TODO: overflow?
-			addCurrent(current);
 		}
 		if (data.stat & (1 << 2)) //V3
 		{
 			bool dataValid = (data.values[4] & (1 << 7)) != 0; //TODO: do something about this
-			bool sign = (data.values[4] & (1 << 6)) != 0; //if 1 then -
-			data.values[4] = data.values[4] & (0b00111111); //clear data valid and sign
-			uint16_t voltageRaw = (data.values[4] << 8) + data.values[5];
-			float voltage;
-			if (sign)
-				voltage = -float(voltageRaw);
-			else
-				voltage = float(voltageRaw);
-			voltage *= VoltageLsb;
-			addVoltage(voltage);
+			if (dataValid)
+			{
+				bool sign = (data.values[4] & (1 << 6)) != 0; //if 1 then -
+				data.values[4] = data.values[4] & (0b00111111); //clear data valid and sign
+				uint16_t voltageRaw = (data.values[4] << 8) + data.values[5];
+				float voltage;
+				if (sign)
+					voltage = -float(voltageRaw);
+				else
+					voltage = float(voltageRaw);
+				voltage *= VoltageLsb;
+				addVoltage(voltage);
+			}
 		}
 		sendToLcd();
 		sendToStorage();
@@ -167,4 +171,11 @@ void CalculatorTask::sendToLcd(void)
 
 void CalculatorTask::sendToStorage(void)
 {
+	if (UsbTask::isOk())
+	{
+		StorageData outputData;
+		outputData.voltage = voltageTab[voltageTabPt];
+		outputData.current = currentTab[currentTabPt];
+		xQueueSendToFront(xQueue_Storage, (void * ) &outputData, (portTickType ) 0);
+	}
 }
