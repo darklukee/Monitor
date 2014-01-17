@@ -30,7 +30,6 @@ class ExtADC
 {
 public:
 	ExtADC();
-	~ExtADC();
 	static void GPIO_Config(void);
 	void init(void);
 	bool config(void);
