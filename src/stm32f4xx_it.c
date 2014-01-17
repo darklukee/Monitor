@@ -48,8 +48,6 @@ __IO uint8_t LED_Toggle = 0;
 extern USB_OTG_CORE_HANDLE USB_OTG_Core;
 //extern USBH_HOST USB_Host;
 
-extern void UsbTaskToggleEnabled(void);
-
 //Keyboard
 extern uint8_t keyPressed;
 extern void KeyboardTaskResume(void);

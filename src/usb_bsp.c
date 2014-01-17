@@ -26,6 +26,7 @@
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
 #include "task.h"
+#include "queue.h"
 
 /** @addtogroup STM32F4-Discovery_Audio_Player_Recorder
   * @{
@@ -404,6 +405,14 @@ void USB_OTG_BSP_mDelay (const uint32_t msec)
   USB_OTG_BSP_uDelay(msec * 1000);
 #endif
 
+}
+
+uint32_t USB_OTG__BSP_ResetPort_ISR (USB_OTG_CORE_HANDLE *pdev)
+{
+	extern xQueueHandle xQueue_UsbReset;
+	extern long xHigherPriorityTaskWoken;
+	xQueueSendFromISR(xQueue_UsbReset, (void* ) &pdev, &xHigherPriorityTaskWoken);
+	return 1;
 }
 
 /**

@@ -29,8 +29,12 @@
 
 #include "hw_config.h"
 
-#include <stdio.h> //printf//#include "math.h"
-//cpp_wrapper
+extern "C"
+{
+#include "usb_core.h"
+}
+
+#include <stdio.h> //printf//#include "math.h"//cpp_wrapper
 #include <cpp_task.hpp>
 
 //debugger crash test TODO: check if necessary
@@ -44,6 +48,7 @@
 #include "DisplayTask.h"
 #include "UsbTask.h"
 #include "UsbHostTask.h"
+#include "UsbReset.h"
 #include "KeyboardTask.h"
 
 //#include "TestTask.h"
@@ -57,6 +62,7 @@ xQueueHandle xQueue_AdcData;
 xQueueHandle xQueue_Lcd;
 //usb
 xQueueHandle xQueue_Storage;
+xQueueHandle xQueue_UsbReset;
 
 int main(void)
 {
@@ -75,7 +81,8 @@ int main(void)
 	xQueue_I2CEvent = xQueueCreate(3, sizeof(int));
 	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
 	xQueue_Lcd = xQueueCreate(5, sizeof(LcdData));
-	xQueue_Storage = xQueueCreate(10, sizeof(StorageData));
+	xQueue_Storage = xQueueCreate(20, sizeof(StorageData));
+	xQueue_UsbReset = xQueueCreate(2, sizeof(USB_OTG_CORE_HANDLE*));
 
 	/* initialize hardware... */
 	prvSetupHardware();
@@ -83,6 +90,7 @@ int main(void)
 	/* Start the tasks  */
 //	scheduler_add_task(new TestTask());
 //	scheduler_add_task(new LcdPinTestTask());
+	scheduler_add_task(new UsbReset());
 	scheduler_add_task(new DisplayTask());
 	scheduler_add_task(new ExtADCTask());
 	scheduler_add_task(new UsbTask());
