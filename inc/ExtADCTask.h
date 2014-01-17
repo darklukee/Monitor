@@ -26,8 +26,6 @@
 #include <cpp_task.hpp>
 #include "ExtADC.h"
 
-const int maxReceiveBuffer = 3;
-
 class ExtADCTask: public scheduler_task
 {
 public:
@@ -39,6 +37,8 @@ public:
 
 private:
 	ExtADC extADC;
+
+	static const int maxReceiveBuffer = 3;
 	I2CData receiveBuffer[maxReceiveBuffer];
 };
 

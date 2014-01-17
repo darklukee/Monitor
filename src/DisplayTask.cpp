@@ -31,9 +31,8 @@
 extern xQueueHandle xQueue_Lcd;
 
 DisplayTask::DisplayTask() :
-	scheduler_task("DisplayTask", 1024 * 20, PRIORITY_LOW, NULL)
+	scheduler_task("DisplayTask", 1024 * 5, PRIORITY_LOW, NULL)
 {
-	// TODO Auto-generated constructor stub
 	toggle = false;
 	initiated = false;
 }
@@ -49,7 +48,7 @@ bool DisplayTask::init()
 
 bool DisplayTask::taskEntry()
 {
-	this->setFrequency(200); //200ms
+	this->setFrequency(100); //100ms
 //	GLCD.Init(INVERTED);
 	GLCD.Init();
 	GLCD.ClearScreen();
@@ -58,7 +57,7 @@ bool DisplayTask::taskEntry()
 
 	initiated = true;
 	GLCD.CursorTo(0, 0);
-	printf("Voltage:% 10.3f mV\nCurrent:% 10.3f mA\n", 0, 0);
+	printf("Voltage:% 10.3f mV\nCurrent:% 10.3f mA\n", 0.0, 0.0);
 
 	return true;
 }
