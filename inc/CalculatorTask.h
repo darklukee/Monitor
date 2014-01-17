@@ -34,18 +34,23 @@ public:
 
 private:
 	static const uint16_t tabSize = 10;
+
 	float voltageTab[tabSize];
 	float voltageMean;
 	uint16_t voltageTabPt;
+	float addVoltage(float);
+	float getVoltageMean(void);
 
 	float currentTab[tabSize];
 	float currentMean;
 	uint16_t currentTabPt;
-
-	float addVoltage(float);
-	float getVoltageMean(void);
 	float addCurrent(float);
 	float getCurrentMean(void);
+
+//	portTickType timeTab[tabSize];
+//	uint16_t timeTabPt;
+	portTickType lastTimeStamp;
+	portTickType addTime(portTickType);
 
 	bool dataToLcd;
 	void sendToLcd(void);
@@ -55,6 +60,7 @@ private:
 	static const float VoltageLsb = 0.30518; //2500.0 / 8192.0; //0.30518[mV]; 2500mV/2^13; LTC2991 application information
 	static const float CurrentLsb = 0.019075; //2500.0 / 131072.0; //0.019075[mV]; 2500mV/2^17; LTC2991 application information
 	static const float Resistance = 0.39;
+	static const float VoltageDiv = 2;
 
 };
 

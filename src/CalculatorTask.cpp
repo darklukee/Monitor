@@ -35,6 +35,7 @@ CalculatorTask::CalculatorTask() :
 	currentTabPt = 0;
 	voltageMean = 0;
 	currentMean = 0;
+	lastTimeStamp = 0;
 
 	dataToLcd = false;
 //	dataToStorage = false;
@@ -57,7 +58,7 @@ bool CalculatorTask::run(void *param)
 	{
 		if (data.stat & (1 << 1)) //V1-V2
 		{
-			bool dataValid = (data.values[2] & (1 << 7)) != 0; //TODO: do something about this
+			bool dataValid = (data.values[2] & (1 << 7)) != 0;
 			if (dataValid)
 			{
 				bool sign = (data.values[2] & (1 << 6)) != 0; //if 1 then -
@@ -73,13 +74,13 @@ bool CalculatorTask::run(void *param)
 				{
 					current = float(currentRaw);
 				}
-				current *= (CurrentLsb / Resistance); //TODO: overflow?
+				current *= (CurrentLsb / Resistance);
 				addCurrent(current);
 			}
 		}
 		if (data.stat & (1 << 2)) //V3
 		{
-			bool dataValid = (data.values[4] & (1 << 7)) != 0; //TODO: do something about this
+			bool dataValid = (data.values[4] & (1 << 7)) != 0;
 			if (dataValid)
 			{
 				bool sign = (data.values[4] & (1 << 6)) != 0; //if 1 then -
@@ -91,12 +92,33 @@ bool CalculatorTask::run(void *param)
 				else
 					voltage = float(voltageRaw);
 				voltage *= VoltageLsb;
-				addVoltage(voltage);
+
+				if (voltage > -4000 && voltage < 4900)
+					addVoltage(voltage);
+				else //vlotage to high, need to use voltage divider
+				{
+					dataValid = (data.values[6] & (1 << 7)) != 0;
+					if (dataValid)
+					{
+						sign = (data.values[4] & (1 << 6)) != 0; //if 1 then -
+						data.values[6] = data.values[6] & (0b00111111); //clear data valid and sign
+						voltageRaw = (data.values[6] << 8) + data.values[7];
+						if (sign)
+							voltage = -float(voltageRaw);
+						else
+							voltage = float(voltageRaw);
+						voltage *= VoltageLsb * VoltageDiv;
+
+						if (voltage > -4000)
+							addVoltage(voltage);
+					}
+				}
 			}
 		}
+		addTime(data.timeStamp);
+
 		sendToLcd();
 		sendToStorage();
-		//allDataSent();
 	}
 
 	return true;
@@ -157,6 +179,15 @@ float CalculatorTask::getCurrentMean(void)
 	return currentMean;
 }
 
+portTickType CalculatorTask::addTime(portTickType timeStamp)
+{
+//	timeTabPt++;
+//	timeTabPt %= tabSize;
+//	timeTab[timeTabPt] = timeStamp;
+	lastTimeStamp = timeStamp;
+	return lastTimeStamp;
+}
+
 void CalculatorTask::sendToLcd(void)
 {
 	if (dataToLcd)
@@ -176,6 +207,7 @@ void CalculatorTask::sendToStorage(void)
 		StorageData outputData;
 		outputData.voltage = voltageTab[voltageTabPt];
 		outputData.current = currentTab[currentTabPt];
+		outputData.timeStamp = lastTimeStamp;
 		xQueueSendToFront(xQueue_Storage, (void * ) &outputData, (portTickType ) 0);
 	}
 }
