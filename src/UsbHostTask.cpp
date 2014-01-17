@@ -30,7 +30,7 @@ USB_OTG_CORE_HANDLE USB_OTG_Core;
 USBH_HOST USB_Host;
 
 UsbHostTask::UsbHostTask() :
-	scheduler_task("UsbHostTask", 1024 * 10, PRIORITY_LOW, NULL)
+	scheduler_task("UsbHostTask", 1024, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
 	freq = 10; //10 ms

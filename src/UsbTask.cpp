@@ -31,7 +31,7 @@ bool UsbTask::connected = false;
 bool UsbTask::enabled = true;
 
 UsbTask::UsbTask() :
-	scheduler_task("UsbTask", 1024 * 10, PRIORITY_LOW, NULL)
+	scheduler_task("UsbTask", 1024 * 5, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
 	iter = 0;
@@ -54,6 +54,7 @@ bool UsbTask::run(void *param)
 {
 	FRESULT fr;
 	UINT bw;
+	static portTickType initTime;
 	switch (state)
 	{
 	case UsbTaskInit:
@@ -63,7 +64,11 @@ bool UsbTask::run(void *param)
 			//TODO: dynamic filename, csv header
 			fr = f_open(&file, fileName, FA_CREATE_ALWAYS | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
 			if (fr == FR_OK)
+			{
 				state = UsbTaskRun;
+				initTime = xTaskGetTickCount();
+				xQueueReset(xQueue_Storage);
+			}
 		}
 		else
 		{
@@ -74,14 +79,14 @@ bool UsbTask::run(void *param)
 		if (isOk())
 		{
 			StorageData data;
-			while (xQueueReceive(xQueue_Storage, &data, 10) && isOk()) //wait for 10 ticks
+			while (xQueueReceive(xQueue_Storage, &data, 50)) //wait for 10 ticks
 			{
-				const unsigned int size = 40;
+				const unsigned int size = 100;
 				char buf[size];
-				static int iter = 0;
-				unsigned int len = sprintf(buf, "%d,%f,%f,%d\r\n", iter++, data.voltage, data.current,
+//				static int iter = 0;
+				unsigned int len = sprintf(buf, "%lu,%f,%f,%lu\r\n", data.timeStamp - initTime, data.voltage, data.current,
 					uxQueueMessagesWaiting(xQueue_Storage));
-				if (len <= size)
+				if (len <= size && isOk())
 				{
 					fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
 					if (fr != FR_OK || bw < len)
@@ -118,7 +123,7 @@ bool UsbTask::run(void *param)
 		state = UsbTaskInit;
 		break;
 	}
-	iter++;
+	//iter++;
 	return true;
 }
 

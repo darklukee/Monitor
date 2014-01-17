@@ -23,6 +23,7 @@
 #define DATASTRUCTURES_H_
 
 #include<stdint.h>
+#include <portmacro.h> //freeRTOS portTickType
 
 struct LcdData
 {
@@ -50,15 +51,18 @@ typedef struct
 
 struct AdcData
 {
-	uint8_t values[20];
+	uint8_t values[8];
 	uint8_t length;
 	uint8_t stat;
+	portTickType timeStamp;
+//	unsigned long timeStamp;
 };
 
 struct StorageData
 {
 	float voltage;
 	float current;
-//	auto timeStamp; //TODO: add time and others
+	portTickType timeStamp; //TODO: add time and others
+//	unsigned long timeStamp;
 };
 #endif /* DATASTRUCTURES_H_ */

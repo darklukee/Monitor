@@ -52,29 +52,31 @@ bool ExtADCTask::taskEntry()
 bool ExtADCTask::run(void *param)
 {
 	uint8_t stat = extADC.getStatus();
-	vTaskDelay(25);
-	if (stat != 0)
+//	vTaskDelay(25);
+	if ((stat & 0b01110000) == 0b01110000) //(stat != 0)
 	{
 		//TODO: get only values that are available  (based ona stat)
 		//TODO: reduce data payload by getting only necessary fields
+		AdcData outputData;
 
 		receiveBuffer[0].length = I2C_BUFF_SIZE;
 		receiveBuffer[0].reg = EXTADC_REG_V1;
-		receiveBuffer[1].length = I2C_BUFF_SIZE;
-		receiveBuffer[1].reg = EXTADC_REG_V5;
-		receiveBuffer[2].length = 4;
-		receiveBuffer[2].reg = EXTADC_REG_TINT;
+//		receiveBuffer[1].length = I2C_BUFF_SIZE;
+//		receiveBuffer[1].reg = EXTADC_REG_V5;
+//		receiveBuffer[2].length = 4;
+//		receiveBuffer[2].reg = EXTADC_REG_TINT;
 
 		for (int i = 0; i < maxReceiveBuffer; i++)
 		{
 			extADC.getData(receiveBuffer[i]);
 //			vTaskDelay(25);
 		}
+		outputData.timeStamp = xTaskGetTickCount();
 
-		AdcData outputData;
-		outputData.length = receiveBuffer[0].length + receiveBuffer[1].length + receiveBuffer[2].length;
-//		outputData.stat = stat;
-		outputData.stat = 0xff; //TODO: remove of replace
+//		outputData.length = receiveBuffer[0].length + receiveBuffer[1].length + receiveBuffer[2].length;
+		outputData.stat = stat;
+		outputData.length = receiveBuffer[0].length;
+//		outputData.stat = 0xff; //TODO: remove of replace
 		//TODO: add time stamp
 
 		int j = 0;
@@ -82,24 +84,26 @@ bool ExtADCTask::run(void *param)
 		{
 			outputData.values[j + i] = receiveBuffer[0].val[i];
 		}
-		j += receiveBuffer[0].length;
-		for (int i = 0; i < receiveBuffer[1].length; i++)
-		{
-			outputData.values[j + i] = receiveBuffer[1].val[i];
-		}
-		j += receiveBuffer[1].length;
-		for (int i = 0; i < receiveBuffer[2].length; i++)
-		{
-			outputData.values[j + i] = receiveBuffer[2].val[i];
-		}
+//		j += receiveBuffer[0].length;
+//		for (int i = 0; i < receiveBuffer[1].length; i++)
+//		{
+//			outputData.values[j + i] = receiveBuffer[1].val[i];
+//		}
+//		j += receiveBuffer[1].length;
+//		for (int i = 0; i < receiveBuffer[2].length; i++)
+//		{
+//			outputData.values[j + i] = receiveBuffer[2].val[i];
+//		}
 
 		//send output data;
 		xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
+		vTaskDelay(20);
 	}
-
-//	taskYIELD(); //task is going to ready state to allow next one to run
-	vTaskDelay(10);
-	//TODO: add delay, according to received data
+	else
+	{
+		int temp = xTaskGetTickCount();
+		vTaskDelay(1);
+	}
 
 	return true;
 }
