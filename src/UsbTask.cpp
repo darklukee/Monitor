@@ -26,16 +26,17 @@
 #include "DataStructures.h"
 
 extern xQueueHandle xQueue_Storage;
+extern xSemaphoreHandle xSemaphore_UsbMutex;
 
 bool UsbTask::connected = false;
 bool UsbTask::enabled = true;
 
 UsbTask::UsbTask() :
-	scheduler_task("UsbTask", 1024 * 5, PRIORITY_LOW, NULL)
+	scheduler_task("UsbTask", 1024 * 10, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
-	iter = 0;
-	freq = 20;
+	lastSave = 0;
+	//freq = 20;
 	state = UsbTaskInit;
 	strcpy(fileName, "test_file.txt");
 }
@@ -53,77 +54,74 @@ bool UsbTask::taskEntry()
 bool UsbTask::run(void *param)
 {
 	FRESULT fr;
-	UINT bw;
 	static portTickType initTime;
-	switch (state)
+	if ( xSemaphoreTake( xSemaphore_UsbMutex, ( portTickType ) 100 ) == pdTRUE)
 	{
-	case UsbTaskInit:
-		if (isOk())
+		switch (state)
 		{
-			vTaskDelay(OS_MS(100));
-			//TODO: dynamic filename, csv header
-			fr = f_open(&file, fileName, FA_CREATE_ALWAYS | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
-			if (fr == FR_OK)
+		case UsbTaskInit:
+			if (isOk())
 			{
-				state = UsbTaskRun;
-				initTime = xTaskGetTickCount();
-				xQueueReset(xQueue_Storage);
-			}
-		}
-		else
-		{
-			vTaskDelay(OS_MS(500));
-		}
-		break;
-	case UsbTaskRun:
-		if (isOk())
-		{
-			StorageData data;
-			while (xQueueReceive(xQueue_Storage, &data, 50)) //wait for 10 ticks
-			{
-				const unsigned int size = 100;
-				char buf[size];
-//				static int iter = 0;
-				unsigned int len = sprintf(buf, "%lu,%f,%f,%lu\r\n", data.timeStamp - initTime, data.voltage, data.current,
-					uxQueueMessagesWaiting(xQueue_Storage));
-				if (len <= size && isOk())
+				//vTaskDelay(OS_MS(100));
+				//TODO: dynamic filename, csv header
+				fr = f_open(&file, fileName, FA_CREATE_ALWAYS | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
+				if (fr == FR_OK)
 				{
-					fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
-					if (fr != FR_OK || bw < len)
+					state = UsbTaskRun;
+					initTime = xTaskGetTickCount();
+					xQueueReset(xQueue_Storage);
+				}
+			}
+			else
+			{
+				xSemaphoreGive( xSemaphore_UsbMutex );
+				vTaskDelay(OS_MS(500));
+			}
+			break;
+		case UsbTaskRun:
+			if (isOk())
+			{
+				StorageData data;
+				while (xQueueReceive(xQueue_Storage, &data, 50) && isOk()) //wait for 10 ticks
+				{
+					const unsigned int size = 64;
+					char buf[size];
+//				static int iter = 0;
+					unsigned int len = sprintf(buf, "%lu,%f,%f,%lu\r\n", data.timeStamp - initTime, data.voltage, data.current,
+						uxQueueMessagesWaiting(xQueue_Storage));
+					if (len <= size)
 					{
-						state = UsbTaskDeInit;
-						setEnabled(false);
+						UINT bw;
+						fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
+						if (fr != FR_OK || bw < len)
+						{
+							state = UsbTaskDeInit;
+							setEnabled(false);
+						}
+						if (lastSave + 5000 < xTaskGetTickCount()) //save file every 5s
+						{
+							f_sync(&file);
+							lastSave = xTaskGetTickCount();
+						}
 					}
 				}
 			}
-
-//			const unsigned int size = 128;
-//			char buf[size];
-//			unsigned int len = sprintf(buf, "Test Write. time: %.3f, iter: %d\n", double(freq*iter)/1000, iter);
-//			if(len<=size)
-//				fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
-//			if (fr != FR_OK || bw < len)
-//			{
-//				state = UsbTaskDeInit;
-//				setEnabled(false);
-//			}
-//			vTaskDelay(OS_MS(freq));
+			else
+			{
+				state = UsbTaskDeInit;
+			}
+			break;
+		case UsbTaskDeInit:
+			//vTaskDelay(OS_MS(200));
+			f_close(&file);
+			state = UsbTaskInit;
+			break;
+		default:
+			state = UsbTaskInit;
+			break;
 		}
-		else
-		{
-			state = UsbTaskDeInit;
-		}
-		break;
-	case UsbTaskDeInit:
-		vTaskDelay(OS_MS(200));
-		f_close(&file);
-		state = UsbTaskInit;
-		break;
-	default:
-		state = UsbTaskInit;
-		break;
+		xSemaphoreGive( xSemaphore_UsbMutex );
 	}
-	//iter++;
 	return true;
 }
 
@@ -158,5 +156,9 @@ extern "C"
 void UsbTaskToggleEnabled()
 {
 	UsbTask::toggleEnabled();
+}
+void UsbTaskSetConnected(bool _connected)
+{
+	UsbTask::setConnected(_connected);
 }
 }

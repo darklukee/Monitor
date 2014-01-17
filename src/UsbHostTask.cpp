@@ -29,11 +29,13 @@ __IO uint16_t CCR_Val = 16826;
 USB_OTG_CORE_HANDLE USB_OTG_Core;
 USBH_HOST USB_Host;
 
+extern xSemaphoreHandle xSemaphore_UsbMutex;
+
 UsbHostTask::UsbHostTask() :
 	scheduler_task("UsbHostTask", 1024, PRIORITY_LOW, NULL)
 {
 	// TODO Auto-generated constructor stub
-	freq = 10; //10 ms
+	//freq = 10; //10 ms
 }
 
 bool UsbHostTask::init()
@@ -53,8 +55,8 @@ bool UsbHostTask::taskEntry()
 
 bool UsbHostTask::run(void *param)
 {
+	xSemaphoreTake(xSemaphore_UsbMutex, (portTickType ) 0);
 	USBH_Process(&USB_OTG_Core, &USB_Host);
-	vTaskDelay(OS_MS(freq));
 	return true;
 }
 

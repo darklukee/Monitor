@@ -52,7 +52,7 @@ bool ExtADCTask::taskEntry()
 bool ExtADCTask::run(void *param)
 {
 	uint8_t stat = extADC.getStatus();
-//	vTaskDelay(25);
+	vTaskDelay(25);
 	if ((stat & 0b01110000) == 0b01110000) //(stat != 0)
 	{
 		//TODO: get only values that are available  (based ona stat)

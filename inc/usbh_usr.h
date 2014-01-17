@@ -39,6 +39,7 @@
 /* State Machine for the USBH_USR_ApplicationState */
 #define USH_USR_FS_INIT    ((uint8_t)0x00)
 #define USH_USR_RUN      ((uint8_t)0x01)
+#define USH_USR_RUNNING	((uint8_t)0x02)
 
 #define CMD_PLAY           ((uint8_t)0x00)
 #define CMD_RECORD         ((uint8_t)0x01)

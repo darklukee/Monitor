@@ -22,7 +22,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_usr.h"
 #include "stm32f4xx_it.h"
-#include "UsbTask.h"
+
+//#include "UsbTask.h"
+extern void UsbTaskSetConnected(bool);
 
 /** @addtogroup STM32F4-Discovery_Audio_Player_Recorder
   * @{
@@ -220,7 +222,7 @@ void USBH_USR_SerialNum_String(void *SerialNumString)
 void USBH_USR_EnumerationDone(void)
 {
   /* 0.5 seconds delay */
-  USB_OTG_BSP_mDelay(500);
+//  USB_OTG_BSP_mDelay(500);
   
   USBH_USR_MSC_Application();
   //USBH_USR_MSC_Application();
@@ -266,8 +268,9 @@ void USBH_USR_OverCurrentDetected (void)
   */
 int USBH_USR_MSC_Application(void)
 {
+	extern xSemaphoreHandle xSemaphore_UsbMutex;
 
-  switch (USBH_USR_ApplicationState)
+	switch (USBH_USR_ApplicationState)
   {
     case USH_USR_FS_INIT:
 
@@ -292,12 +295,21 @@ int USBH_USR_MSC_Application(void)
       break;
 
     case USH_USR_RUN:
-    	UsbTask::setConnected(true);
+    	UsbTaskSetConnected(true);
+    	USBH_USR_ApplicationState = USH_USR_RUNNING;
 //
 //      /* Set user initialization flag */
 //      USBH_USR_ApplicationState = USH_USR_FS_INIT;
       break;
-
+    case USH_USR_RUNNING:
+    	xSemaphoreGive( xSemaphore_UsbMutex );
+    	USB_OTG_BSP_mDelay(500);
+      if( xSemaphoreTake( xSemaphore_UsbMutex, ( portTickType ) 2000 ) != pdTRUE )
+      {
+      	for(;;);
+      	//TODO: usb error. need log
+      }
+    	break;
     default:
       break;
   }
@@ -313,7 +325,7 @@ int USBH_USR_MSC_Application(void)
 void USBH_USR_DeInit(void)
 {
   USBH_USR_ApplicationState = USH_USR_FS_INIT;
-  UsbTask::setConnected(false);
+  UsbTaskSetConnected(false);
 }
 
 /**

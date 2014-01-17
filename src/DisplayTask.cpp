@@ -29,6 +29,7 @@
 #include "hw_config.h"
 
 extern xQueueHandle xQueue_Lcd;
+extern xQueueHandle xQueue_Lcd_Log;
 
 DisplayTask::DisplayTask() :
 	scheduler_task("DisplayTask", 1024 * 5, PRIORITY_LOW, NULL)
@@ -80,6 +81,17 @@ bool DisplayTask::run(void *param)
 		GLCD.CursorTo(0, 2);
 		printf("%d", i);
 		fflush(stdout);
+	}
+	char log[22];
+	if (xQueueReceive(xQueue_Lcd_Log, &log, 0))
+	{
+		static int line = 3-1;
+		line++;
+		line %= 3;
+		GLCD.CursorTo(0,3+line);
+		GLCD.Puts(log);
+		GLCD.CursorTo(0,3+((line+1)%3));
+		GLCD.Puts("                     ");
 	}
 
 	GLCD.CursorTo(21-6, 7);

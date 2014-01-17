@@ -60,9 +60,11 @@ xQueueHandle xQueue_I2CEvent;
 xQueueHandle xQueue_AdcData;
 //glcd
 xQueueHandle xQueue_Lcd;
+xQueueHandle xQueue_Lcd_Log;
 //usb
 xQueueHandle xQueue_Storage;
 xQueueHandle xQueue_UsbReset;
+xSemaphoreHandle xSemaphore_UsbMutex;
 
 int main(void)
 {
@@ -83,6 +85,9 @@ int main(void)
 	xQueue_Lcd = xQueueCreate(5, sizeof(LcdData));
 	xQueue_Storage = xQueueCreate(20, sizeof(StorageData));
 	xQueue_UsbReset = xQueueCreate(2, sizeof(USB_OTG_CORE_HANDLE*));
+	xQueue_Lcd_Log = xQueueCreate(3, sizeof(char[22]));
+	//create semaphores
+	xSemaphore_UsbMutex = xSemaphoreCreateMutex();
 
 	/* initialize hardware... */
 	prvSetupHardware();
@@ -93,8 +98,8 @@ int main(void)
 	scheduler_add_task(new UsbReset());
 	scheduler_add_task(new DisplayTask());
 	scheduler_add_task(new ExtADCTask());
-	scheduler_add_task(new UsbTask());
 	scheduler_add_task(new UsbHostTask());
+	scheduler_add_task(new UsbTask());
 	scheduler_add_task(new KeyboardTask());
 	scheduler_add_task(new CalculatorTask());
 

@@ -27,6 +27,7 @@ extern "C"
 {
 #include "ff.h"
 }
+extern xQueueHandle xQueue_Lcd_Log;
 
 enum UsbTaskState
 {
@@ -48,6 +49,10 @@ public:
 	static void setConnected(bool _connected)
 	{
 		connected = _connected;
+		if (connected)
+			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb connected"), (portTickType ) 0);
+		else
+			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb disconnected"), (portTickType ) 0);
 	}
 	static bool isEnabled(void)
 	{
@@ -55,11 +60,16 @@ public:
 	}
 	static void setEnabled(bool _enabled)
 	{
+		xQueueSend(xQueue_Lcd_Log, (void * ) &("usb setEnabled"), (portTickType ) 0);
 		enabled = _enabled;
 	}
 	static void toggleEnabled(void)
 	{
 		enabled ^= true;
+		if (enabled)
+			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb Enabled"), (portTickType ) 0);
+		else
+			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb Disabled"), (portTickType ) 0);
 	}
 	static bool isOk(void)
 	{
@@ -67,7 +77,7 @@ public:
 	}
 
 private:
-	int iter;
+	unsigned long lastSave;
 	int freq;
 	static bool connected;
 	static bool enabled;
