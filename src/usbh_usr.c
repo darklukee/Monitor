@@ -304,10 +304,15 @@ int USBH_USR_MSC_Application(void)
     case USH_USR_RUNNING:
     	xSemaphoreGive( xSemaphore_UsbMutex );
     	USB_OTG_BSP_mDelay(500);
-      if( xSemaphoreTake( xSemaphore_UsbMutex, ( portTickType ) 2000 ) != pdTRUE )
+      if( xSemaphoreTake( xSemaphore_UsbMutex, ( portTickType ) 15000 ) != pdTRUE )
       {
-      	for(;;);
-      	//TODO: usb error. need log
+      	//UsbTask is taking too long. mayby it has too much data. Simulate temporary disconnect.
+      	UsbTaskSetConnected(false);
+        if( xSemaphoreTake( xSemaphore_UsbMutex, ( portTickType ) 1000 ) != pdTRUE )
+        {
+        	for(;;);
+        }
+        UsbTaskSetConnected(true);
       }
     	break;
     default:

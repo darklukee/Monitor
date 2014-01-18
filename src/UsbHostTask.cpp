@@ -32,10 +32,8 @@ USBH_HOST USB_Host;
 extern xSemaphoreHandle xSemaphore_UsbMutex;
 
 UsbHostTask::UsbHostTask() :
-	scheduler_task("UsbHostTask", 1024, PRIORITY_LOW, NULL)
+	scheduler_task("UsbHostTask", 1024, PRIORITY_MEDIUM, NULL)
 {
-	// TODO Auto-generated constructor stub
-	//freq = 10; //10 ms
 }
 
 bool UsbHostTask::init()
@@ -50,13 +48,17 @@ bool UsbHostTask::taskEntry()
 {
 	/* Init Host Library */
 	USBH_Init(&USB_OTG_Core, USB_OTG_FS_CORE_ID, &USB_Host, &USBH_MSC_cb, &USR_Callbacks);
+	if(xSemaphoreTake(xSemaphore_UsbMutex, (portTickType ) 1000) != pdPASS)
+		return false;
+	//semaphore give inside USBH_USR_MSC_Application()
+
 	return true;
 }
 
 bool UsbHostTask::run(void *param)
 {
-	xSemaphoreTake(xSemaphore_UsbMutex, (portTickType ) 0);
 	USBH_Process(&USB_OTG_Core, &USB_Host);
+	vTaskDelayMs(5);
 	return true;
 }
 

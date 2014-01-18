@@ -34,11 +34,10 @@ bool UsbTask::enabled = true;
 UsbTask::UsbTask() :
 	scheduler_task("UsbTask", 1024 * 10, PRIORITY_LOW, NULL)
 {
-	// TODO Auto-generated constructor stub
 	lastSave = 0;
-	//freq = 20;
+	//setFrequency(20);
 	state = UsbTaskInit;
-	strcpy(fileName, "test_file.txt");
+	strcpy(fileName, "IV_monitor.csv");
 }
 
 bool UsbTask::init()
@@ -74,15 +73,16 @@ bool UsbTask::run(void *param)
 			}
 			else
 			{
-				xSemaphoreGive( xSemaphore_UsbMutex );
+				xSemaphoreGive(xSemaphore_UsbMutex);
 				vTaskDelay(OS_MS(500));
 			}
 			break;
 		case UsbTaskRun:
 			if (isOk())
 			{
+				bool mutexTimeout = false; //if in loop for to long
 				StorageData data;
-				while (xQueueReceive(xQueue_Storage, &data, 50) && isOk()) //wait for 10 ticks
+				while (xQueueReceive(xQueue_Storage, &data, 50) && isOk() && !mutexTimeout) //wait for x ticks
 				{
 					const unsigned int size = 64;
 					char buf[size];
@@ -98,11 +98,13 @@ bool UsbTask::run(void *param)
 							state = UsbTaskDeInit;
 							setEnabled(false);
 						}
-						if (lastSave + 5000 < xTaskGetTickCount()) //save file every 5s
-						{
-							f_sync(&file);
-							lastSave = xTaskGetTickCount();
-						}
+
+					}
+					if (lastSave + 5000 < xTaskGetTickCount()) //save file every 5s
+					{
+						f_sync(&file);
+						lastSave = xTaskGetTickCount();
+						mutexTimeout = true; //too long in this loop. force exit and give UsbMutex
 					}
 				}
 			}
@@ -120,7 +122,7 @@ bool UsbTask::run(void *param)
 			state = UsbTaskInit;
 			break;
 		}
-		xSemaphoreGive( xSemaphore_UsbMutex );
+		xSemaphoreGive(xSemaphore_UsbMutex);
 	}
 	return true;
 }

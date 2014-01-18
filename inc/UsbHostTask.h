@@ -31,10 +31,9 @@ public:
 	bool init();
 	bool taskEntry();
 	bool run(void *param);
+
 	//usb specific
 	static void TIM_LED_Config(void);
-private:
-	int freq;
 };
 
 #endif /* USBHOSTTASK_H_ */

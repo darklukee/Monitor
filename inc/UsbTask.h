@@ -50,7 +50,7 @@ public:
 	{
 		connected = _connected;
 		if (connected)
-			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb connected"), (portTickType ) 0);
+			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb connected"), (portTickType ) 0); //FIXME: optimise/remove
 		else
 			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb disconnected"), (portTickType ) 0);
 	}
@@ -78,7 +78,6 @@ public:
 
 private:
 	unsigned long lastSave;
-	int freq;
 	static bool connected;
 	static bool enabled;
 	FIL file; //FatFs file object
