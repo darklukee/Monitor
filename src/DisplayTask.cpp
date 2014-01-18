@@ -66,38 +66,38 @@ bool DisplayTask::taskEntry()
 bool DisplayTask::run(void *param)
 {
 	static int i = 0;
+	char print[22];
 	LcdData values;
 	if (xQueueReceive(xQueue_Lcd, &values, 0))
 	{
 		if (uxQueueMessagesWaiting(xQueue_Lcd) > 2)
 			xQueueReset(xQueue_Lcd); //discard old values
+
 		GLCD.CursorTo(8, 0);
-		//printf("Voltage: %8.3f mV\nCurrent: %8.3f mA\n%d\n", values.voltage, values.current, i);
-		printf("% 10.3f", values.voltage);
-		fflush(stdout);
+		sprintf(print,"% 10.3f", values.voltage);
+		GLCD.Puts(print);
 		GLCD.CursorTo(8, 1);
-		printf("% 10.3f", values.current);
-		fflush(stdout);
+		sprintf(print,"% 10.3f", values.current);
+		GLCD.Puts(print);
 		GLCD.CursorTo(0, 2);
-		printf("%d", i);
-		fflush(stdout);
+		sprintf(print,"%d", i);
+		GLCD.Puts(print);
 	}
-	char log[22];
-	if (xQueueReceive(xQueue_Lcd_Log, &log, 0))
+	if (xQueueReceive(xQueue_Lcd_Log, &print, 0))
 	{
-		static int line = 3-1;
+		const int lineSize = 5;
+		static int line = lineSize-1;
 		line++;
-		line %= 3;
+		line %= lineSize;
 		GLCD.CursorTo(0,3+line);
-		GLCD.Puts(log);
-		GLCD.CursorTo(0,3+((line+1)%3));
+		GLCD.Puts(print);
+		GLCD.CursorTo(0,3+((line+1)%lineSize));
 		GLCD.Puts("                     ");
 	}
 
 	GLCD.CursorTo(21-6, 7);
-	printf("%6d", i++);
-	fflush(stdout);
-	GLCD.CursorTo(0, 2);
+	sprintf(print,"%6d", i++);
+	GLCD.Puts(print);
 	//Demo();
 
 //	vTaskSuspend(this->getTaskHandle());

@@ -25,11 +25,12 @@
 #include "DataStructures.h"
 
 extern xQueueHandle xQueue_Lcd;
+extern xQueueHandle xQueue_Lcd_Log;
 extern xQueueHandle xQueue_AdcData;
 extern xQueueHandle xQueue_Storage;
 
 CalculatorTask::CalculatorTask() :
-	scheduler_task("CalculatorTask", 1024, PRIORITY_LOW, NULL)
+	scheduler_task("CalculatorTask", 1024*2, PRIORITY_LOW, NULL)
 {
 	voltageTabPt = 0;
 	currentTabPt = 0;
@@ -56,6 +57,13 @@ bool CalculatorTask::run(void *param)
 	AdcData data;
 	if (xQueueReceive(xQueue_AdcData, &(data), portMAX_DELAY))
 	{
+//		if(uxQueueMessagesWaiting(xQueue_AdcData) > 5)
+//		{
+//			char log[5];
+//			log[0] = 'a' + uxQueueMessagesWaiting(xQueue_AdcData);
+//			xQueueSend(xQueue_Lcd_Log, (void * ) &log, (portTickType ) 0);
+//		}
+
 		if (data.stat & (1 << 1)) //V1-V2
 		{
 			bool dataValid = (data.values[2] & (1 << 7)) != 0;
@@ -109,7 +117,7 @@ bool CalculatorTask::run(void *param)
 							voltage = float(voltageRaw);
 						voltage *= VoltageLsb * VoltageDiv;
 
-						if (voltage > -4000)
+						if (voltage > -4000 && voltage < 9800)
 							addVoltage(voltage);
 					}
 				}

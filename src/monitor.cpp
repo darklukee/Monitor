@@ -26,6 +26,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+//cpp_wrapper
+#include <cpp_task.hpp>
 
 #include "hw_config.h"
 
@@ -34,13 +36,9 @@ extern "C"
 #include "usb_core.h"
 }
 
-#include <stdio.h> //printf//#include "math.h"//cpp_wrapper
-#include <cpp_task.hpp>
-
-//debugger crash test TODO: check if necessary
+//#include <stdio.h> //printf//#include "math.h"
 #include "Global.h"
 #include "DataStructures.h"
-
 #include "ExtADC.h"
 #include "ExtADCTask.h"
 #include "CalculatorTask.h"
@@ -69,25 +67,27 @@ xSemaphoreHandle xSemaphore_UsbMutex;
 int main(void)
 {
 	/*debugger crash workaround TODO: deal with this abomination */
-	Global &glob = Global::getInstance();
+	Global &global = Global::getInstance();
 //	glob.setSwitch(eLcdMenu, (uint8_t) true);
-//	ExtADC ext;
-//	Display dis;
-//	ExtADCTask ext2;
-
-	printf("%f", 3.141592);
-
 	/*end of debugger crash prevention*/
 
 	//create queues
 	xQueue_I2CEvent = xQueueCreate(3, sizeof(int));
 	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
 	xQueue_Lcd = xQueueCreate(5, sizeof(LcdData));
+	xQueue_Lcd_Log = xQueueCreate(3, sizeof(char[22]));
 	xQueue_Storage = xQueueCreate(20, sizeof(StorageData));
 	xQueue_UsbReset = xQueueCreate(2, sizeof(USB_OTG_CORE_HANDLE*));
-	xQueue_Lcd_Log = xQueueCreate(3, sizeof(char[22]));
 	//create semaphores
 	xSemaphore_UsbMutex = xSemaphoreCreateMutex();
+	//register queue names
+	vQueueAddToRegistry(xQueue_I2CEvent, (signed char*)"I2cEvent");
+	vQueueAddToRegistry(xQueue_AdcData, (signed char*)"AdcData");
+	vQueueAddToRegistry(xQueue_Lcd, (signed char*)"Lcd");
+	vQueueAddToRegistry(xQueue_Lcd_Log, (signed char*)"Lcd_Log");
+	vQueueAddToRegistry(xQueue_Storage, (signed char*)"Storage");
+	vQueueAddToRegistry(xQueue_UsbReset, (signed char*)"UsbReset");
+	//vQueueAddToRegistry(xSemaphore_UsbMutex, (signed char*)"UsbMutex"); //useless
 
 	/* initialize hardware... */
 	prvSetupHardware();

@@ -166,7 +166,7 @@
 						<entry excluding="src/usb_otg.c|src/usb_dcd.c|src/usb_dcd_int.c|src/usb_bsp_template.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="STM32_USB_OTG_Driver"/>
 						<entry excluding="src/option/unicode.c|src/option/cc950.c|src/option/cc949.c|src/option/cc936.c|src/option/cc932.c|src/diskio.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="fat_fs"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="inc"/>
-						<entry excluding="stm32f4xx_interrupts.cpp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+						<entry excluding="TestTask.cpp|LcdPinTestTask.cpp|PGA.cpp|stm32f4xx_interrupts.cpp" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -293,7 +293,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="src/stm32f4xx_interrupts.cpp|fat_fs/src/option/unicode.c|fat_fs/src/option/cc950.c|fat_fs/src/option/cc949.c|fat_fs/src/option/cc936.c|fat_fs/src/option/cc932.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_ltdc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dma2d.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sai.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dac.c|STM32_USB_OTG_Driver/src/usb_otg.c|STM32_USB_OTG_Driver/src/usb_dcd.c|STM32_USB_OTG_Driver/src/usb_dcd_int.c|STM32_USB_OTG_Driver/src/usb_bsp_template.c|STM32_USB_HOST_Library/Class/HID|fat_fs/src/diskio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_wwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_usart.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sdio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_rng.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_iwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_sha1.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_md5.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fsmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dcmi.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_tdes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_des.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_aes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_crc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_can.c|STM32F4-Discovery/stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="src/TestTask.cpp|src/LcdPinTestTask.cpp|src/PGA.cpp|src/stm32f4xx_interrupts.cpp|fat_fs/src/option/unicode.c|fat_fs/src/option/cc950.c|fat_fs/src/option/cc949.c|fat_fs/src/option/cc936.c|fat_fs/src/option/cc932.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_ltdc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dma2d.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sai.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dac.c|STM32_USB_OTG_Driver/src/usb_otg.c|STM32_USB_OTG_Driver/src/usb_dcd.c|STM32_USB_OTG_Driver/src/usb_dcd_int.c|STM32_USB_OTG_Driver/src/usb_bsp_template.c|STM32_USB_HOST_Library/Class/HID|fat_fs/src/diskio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_wwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_usart.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_sdio.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_rng.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_iwdg.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_sha1.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_hash_md5.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_fsmc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_dcmi.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_tdes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_des.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_cryp_aes.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_crc.c|STM32F4xx_StdPeriph_Driver/stm32f4xx_can.c|STM32F4-Discovery/stm32f4_discovery_audio_codec.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -342,8 +342,8 @@
 			<resource resourceType="PROJECT" workspacePath="/monitor"/>
 		</configuration>
 		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/monitor"/>
 			<resource resourceType="PROJECT" workspacePath="/Monitor2"/>
+			<resource resourceType="PROJECT" workspacePath="/common"/>
 			<resource resourceType="PROJECT" workspacePath="/GLCD-arm"/>
 		</configuration>
 	</storageModule>
