@@ -423,8 +423,6 @@ void I2C3_EV_IRQHandler(void)
 				xQueueSendFromISR(xQueue_I2CEvent, (void* ) &i2cPointer, &xHigherPriorityTaskWoken);
 			}
 			break;
-		case 0x40: //FIXME: shouldn't be here!
-			break;
 		default:
 			//TODO: show info
 			break;

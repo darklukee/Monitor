@@ -33,7 +33,7 @@ public:
 	bool run(void *param);
 
 private:
-	static const uint16_t tabSize = 10;
+	static const uint16_t tabSize = 30;
 
 	float voltageTab[tabSize];
 	float voltageMean;

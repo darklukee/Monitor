@@ -28,7 +28,7 @@
 extern xQueueHandle xQueue_AdcData;
 
 ExtADCTask::ExtADCTask() :
-	scheduler_task("ExtADCTask", 1024, PRIORITY_MEDIUM, NULL)
+	scheduler_task("ExtADCTask", 1024 * 2, PRIORITY_MEDIUM, NULL)
 {
 	for (int i = 0; i < maxReceiveBuffer; i++)
 	{
@@ -52,8 +52,8 @@ bool ExtADCTask::taskEntry()
 bool ExtADCTask::run(void *param)
 {
 	uint8_t stat = extADC.getStatus();
-	vTaskDelay(25);
-	if ((stat & 0b01110000) == 0b01110000) //(stat != 0)
+	//vTaskDelay(20);
+	if ((stat & 0b00001110) == 0b00001110) //(stat != 0) FIXME: 0b01110000
 	{
 		//TODO: get only values that are available  (based ona stat)
 		//TODO: reduce data payload by getting only necessary fields
@@ -97,12 +97,12 @@ bool ExtADCTask::run(void *param)
 
 		//send output data;
 		xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
-		vTaskDelay(20);
+		vTaskDelay(7);
 	}
 	else
 	{
-		int temp = xTaskGetTickCount();
-		vTaskDelay(1);
+		//int temp = xTaskGetTickCount();
+		vTaskDelay(3);
 	}
 
 	return true;
