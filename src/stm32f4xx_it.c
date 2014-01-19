@@ -38,8 +38,6 @@
 #include <stdbool.h>
 
 portBASE_TYPE xHigherPriorityTaskWoken;
-extern xQueueHandle xQueue_I2CEvent;
-extern xQueueHandle xQueue_Keyboard;
 
 //USB
 uint16_t capture = 0;
@@ -51,8 +49,10 @@ extern USB_OTG_CORE_HANDLE USB_OTG_Core;
 //Keyboard
 extern uint8_t keyPressed;
 extern void KeyboardTaskResume(void);
+extern xQueueHandle xQueue_Keyboard;
 
 //ADC i2c
+extern xQueueHandle xQueue_I2CEvent;
 int i2cPointer = 0;
 I2CData i2cData_it[I2C_DATA_SIZE];
 int getI2cPointer(void)

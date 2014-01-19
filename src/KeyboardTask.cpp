@@ -32,7 +32,7 @@ uint8_t keyPressed; //for queue
 
 const int debouncePeriod = 5; //ms
 const int numOfKeys = KEYn; //without one on discovery board
-const int timesChecked = 4; //how many times button is checked;
+const int timesChecked = 5; //how many times button is checked;
 bool debounceEnabled[numOfKeys];
 bool debounceTable[numOfKeys][timesChecked];
 
@@ -56,7 +56,7 @@ bool KeyboardTask::init()
 
 bool KeyboardTask::taskEntry()
 {
-	this->setFrequency(OS_MS(debouncePeriod));
+	this->setFrequency(debouncePeriod);
 	return true;
 }
 
