@@ -27,6 +27,8 @@ extern "C"
 {
 #include "ff.h"
 }
+
+#include "Lcd_Log_Messages.h"
 extern xQueueHandle xQueue_Lcd_Log;
 
 enum UsbTaskState
@@ -49,10 +51,11 @@ public:
 	static void setConnected(bool _connected)
 	{
 		connected = _connected;
+		LcdLogEnum log;
 		if (connected)
-			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb connected"), (portTickType ) 0); //FIXME: optimise/remove
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbCon), (portTickType ) 0); //FIXME: optimise/remove
 		else
-			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb disconnected"), (portTickType ) 0);
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbDisCon), (portTickType ) 0);
 	}
 	static bool isEnabled(void)
 	{
@@ -60,16 +63,21 @@ public:
 	}
 	static void setEnabled(bool _enabled)
 	{
-		xQueueSend(xQueue_Lcd_Log, (void * ) &("usb setEnabled"), (portTickType ) 0);
 		enabled = _enabled;
+		LcdLogEnum log;
+		if (enabled)
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbEn), (portTickType ) 0);
+		else
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbDis), (portTickType ) 0);
 	}
 	static void toggleEnabled(void)
 	{
 		enabled ^= true;
+		LcdLogEnum log;
 		if (enabled)
-			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb Enabled"), (portTickType ) 0);
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbEn), (portTickType ) 0);
 		else
-			xQueueSend(xQueue_Lcd_Log, (void * ) &("usb Disabled"), (portTickType ) 0);
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbDis), (portTickType ) 0);
 	}
 	static bool isOk(void)
 	{

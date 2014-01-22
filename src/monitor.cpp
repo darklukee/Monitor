@@ -44,6 +44,7 @@ extern "C"
 #include "CalculatorTask.h"
 #include "Display.h"
 #include "DisplayTask.h"
+#include "Lcd_Log_Messages.h"
 #include "UsbTask.h"
 #include "UsbHostTask.h"
 #include "UsbReset.h"
@@ -75,7 +76,7 @@ int main(void)
 	xQueue_I2CEvent = xQueueCreate(3, sizeof(int));
 	xQueue_AdcData = xQueueCreate(10, sizeof(AdcData));
 	xQueue_Lcd = xQueueCreate(5, sizeof(LcdData));
-	xQueue_Lcd_Log = xQueueCreate(3, sizeof(char[22]));
+	xQueue_Lcd_Log = xQueueCreate(3, sizeof(LcdLogEnum));
 	xQueue_Storage = xQueueCreate(20, sizeof(StorageData));
 	xQueue_UsbReset = xQueueCreate(2, sizeof(USB_OTG_CORE_HANDLE*));
 	//create semaphores

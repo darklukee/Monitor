@@ -28,6 +28,8 @@
 #include "DataStructures.h"
 #include "hw_config.h"
 
+#include "Lcd_Log_Messages.h"
+
 extern xQueueHandle xQueue_Lcd;
 extern xQueueHandle xQueue_Lcd_Log;
 
@@ -83,14 +85,17 @@ bool DisplayTask::run(void *param)
 		sprintf(print,"%d", i);
 		GLCD.Puts(print);
 	}
-	if (xQueueReceive(xQueue_Lcd_Log, &print, 0))
+
+	//logger
+	LcdLogEnum log;
+	if (xQueueReceive(xQueue_Lcd_Log, &log, 0))
 	{
 		const int lineSize = 5;
 		static int line = lineSize-1;
 		line++;
 		line %= lineSize;
 		GLCD.CursorTo(0,3+line);
-		GLCD.Puts(print);
+		GLCD.Puts(LcdLogTab[log]);
 		GLCD.CursorTo(0,3+((line+1)%lineSize));
 		GLCD.Puts("                     ");
 	}

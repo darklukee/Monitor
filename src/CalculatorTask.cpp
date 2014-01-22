@@ -57,13 +57,6 @@ bool CalculatorTask::run(void *param)
 	AdcData data;
 	if (xQueueReceive(xQueue_AdcData, &(data), portMAX_DELAY))
 	{
-//		if(uxQueueMessagesWaiting(xQueue_AdcData) > 5)
-//		{
-//			char log[5];
-//			log[0] = 'a' + uxQueueMessagesWaiting(xQueue_AdcData);
-//			xQueueSend(xQueue_Lcd_Log, (void * ) &log, (portTickType ) 0);
-//		}
-
 		if (data.stat & (1 << 1)) //V1-V2
 		{
 			bool dataValid = (data.values[2] & (1 << 7)) != 0;
