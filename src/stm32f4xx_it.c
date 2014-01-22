@@ -323,12 +323,14 @@ void I2C3_EV_IRQHandler(void)
 
 	static int index = 0;
 	static bool regSent = false;
+	static int errorCounter = 0;
+
 	uint32_t event = I2C_GetLastEvent(I2C3);
 	if ((i2cData_it[i2cPointer].dir) == DirWrite)
 	{
 		switch (event)
 		{
-// EV5
+		// EV5
 		case I2C_EVENT_MASTER_MODE_SELECT:
 			//Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
 			I2C_Send7bitAddress(ADC_I2C, ExtADCAddr, I2C_Direction_Transmitter);
@@ -380,7 +382,7 @@ void I2C3_EV_IRQHandler(void)
 	{
 		switch (event)
 		{
-// EV5
+		// EV5
 		case I2C_EVENT_MASTER_MODE_SELECT:
 			if (!regSent)
 			{
@@ -439,13 +441,23 @@ void I2C3_EV_IRQHandler(void)
 			{
 				index = 0;
 				regSent = false;
-				I2C_ReceiveData(ADC_I2C); //TODO: check! clear data register. flag I2C_SR1_RXNE
+				errorCounter = 0;
+				I2C_ReceiveData(ADC_I2C); //clear data register. flag I2C_SR1_RXNE
 				I2C_ITConfig(ADC_I2C, I2C_IT_EVT | I2C_IT_ERR | I2C_IT_BUF, DISABLE);
 				xQueueSendFromISR(xQueue_I2CEvent, (void* ) &i2cPointer, &xHigherPriorityTaskWoken);
 			}
 			break;
 		default:
 			//TODO: show info
+
+			errorCounter++;
+			if (errorCounter > 1000000)
+			{
+				I2C_AcknowledgeConfig(ADC_I2C, DISABLE);
+				I2C_ReceiveData(ADC_I2C);
+				I2C_GenerateSTOP(ADC_I2C, ENABLE);
+				errorCounter = 0;
+			}
 			break;
 		}
 	}

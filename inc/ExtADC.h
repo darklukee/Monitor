@@ -38,8 +38,8 @@ public:
 	bool getData(I2CData &data);
 
 private:
-	void i2cWrite(I2CData &data);
-	void i2cRead(I2CData &data);
+	bool i2cWrite(I2CData &data);
+	bool i2cRead(I2CData &data);
 	void copyI2cData(I2CData *src, I2CData *dest);
 
 	bool verifyI2cWrite(I2CData &data);

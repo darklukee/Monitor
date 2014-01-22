@@ -28,7 +28,7 @@
 extern xQueueHandle xQueue_AdcData;
 
 ExtADCTask::ExtADCTask() :
-	scheduler_task("ExtADCTask", 1024 * 2, PRIORITY_MEDIUM, NULL)
+	scheduler_task("ExtADCTask", 1024 * 3, PRIORITY_MEDIUM, NULL)
 {
 	for (int i = 0; i < maxReceiveBuffer; i++)
 	{
@@ -66,24 +66,26 @@ bool ExtADCTask::run(void *param)
 //		receiveBuffer[2].length = 4;
 //		receiveBuffer[2].reg = EXTADC_REG_TINT;
 
+		bool ok = true;
 		for (int i = 0; i < maxReceiveBuffer; i++)
 		{
-			extADC.getData(receiveBuffer[i]);
+			ok &= extADC.getData(receiveBuffer[i]);
+			outputData.timeStamp = xTaskGetTickCount();
 //			vTaskDelay(25);
 		}
-		outputData.timeStamp = xTaskGetTickCount();
-
-//		outputData.length = receiveBuffer[0].length + receiveBuffer[1].length + receiveBuffer[2].length;
-		outputData.stat = stat;
-		outputData.length = receiveBuffer[0].length;
-//		outputData.stat = 0xff; //TODO: remove of replace
-		//TODO: add time stamp
-
-		int j = 0;
-		for (int i = 0; i < receiveBuffer[0].length; i++)
+		if (ok)
 		{
-			outputData.values[j + i] = receiveBuffer[0].val[i];
-		}
+//		outputData.length = receiveBuffer[0].length + receiveBuffer[1].length + receiveBuffer[2].length;
+			outputData.stat = stat;
+			outputData.length = receiveBuffer[0].length;
+//		outputData.stat = 0xff; //TODO: remove of replace
+			//TODO: add time stamp
+
+			int j = 0;
+			for (int i = 0; i < receiveBuffer[0].length; i++)
+			{
+				outputData.values[j + i] = receiveBuffer[0].val[i];
+			}
 //		j += receiveBuffer[0].length;
 //		for (int i = 0; i < receiveBuffer[1].length; i++)
 //		{
@@ -95,14 +97,16 @@ bool ExtADCTask::run(void *param)
 //			outputData.values[j + i] = receiveBuffer[2].val[i];
 //		}
 
-		//send output data;
-		xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
-		vTaskDelay(7);
+			//send output data;
+			xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
+		}
+
+		vTaskDelay(5);
 	}
 	else
 	{
 		//int temp = xTaskGetTickCount();
-		vTaskDelay(3);
+		vTaskDelay(2);
 	}
 
 	return true;

@@ -121,7 +121,7 @@ bool ExtADC::config(void)
 	config.val[0] = EXTADC_BIT_V1_2_DIF; //differential measurement
 	config.val[1] = 0; //EXTADC_BIT_V7_8_T | EXTADC_BIT_V7_8_K; //temperature measurement in kelvin
 	config.val[2] = EXTADC_BIT_REPEAT; // | EXTADC_BIT_TINT_K; //repeat mode, tint in kelvin
-	process(config);
+	while(!process(config)); //as long as succeed
 //	if (!verifyI2cWrite(config))
 //		return false;
 
@@ -130,7 +130,7 @@ bool ExtADC::config(void)
 	config.length = 1;
 	config.reg = EXTADC_REG_CH_EN;
 	config.val[0] = EXTADC_CH_V1_2 | EXTADC_CH_V3_4; //| EXTADC_CH_V5_6 | EXTADC_CH_T4; //TODO: Tint and Vcc
-	process(config);
+	while(!process(config)); //as long as succeed
 //	if (!verifyI2cWrite(config)) //bit changes in register
 //		return false;
 
@@ -146,18 +146,16 @@ bool ExtADC::process(I2CData& data)
 	if (data.dir == DirWrite)
 	{
 		//write stuff
-		i2cWrite(data);
-		return false;
+		return i2cWrite(data);;
 	}
 	else
 	{
 		//read stuff
-		i2cRead(data);
-		return true;
+		return i2cRead(data);
 	}
 }
 
-void ExtADC::i2cWrite(I2CData &data)
+bool ExtADC::i2cWrite(I2CData &data)
 {
 	int it = getI2cPointer();
 	int itCheck = -1; //to check if correct request was completed
@@ -174,10 +172,10 @@ void ExtADC::i2cWrite(I2CData &data)
 				ok = true;
 		}
 	}
-	return;
+	return ok;
 }
 
-void ExtADC::i2cRead(I2CData &data)
+bool ExtADC::i2cRead(I2CData &data)
 {
 	int it = getI2cPointer();
 	int itCheck = -1; //to check if correct request was completed
@@ -190,7 +188,7 @@ void ExtADC::i2cRead(I2CData &data)
 	bool ok = false;
 	while (!ok)
 	{
-		if (xQueueReceive(xQueue_I2CEvent, &itCheck, portMAX_DELAY) == pdPASS)
+		if (xQueueReceive(xQueue_I2CEvent, &itCheck, 1000) == pdPASS)
 		{
 			if (itCheck == it)
 			{
@@ -199,8 +197,14 @@ void ExtADC::i2cRead(I2CData &data)
 				copyI2cData(&(i2cData_it[it]), &data);
 			}
 		}
+		else
+		{
+			//I2C deadlock, emergency break
+			//TODO: log
+			break;
+		}
 	}
-	return;
+	return ok;
 }
 
 void ExtADC::copyI2cData(I2CData* src, I2CData* dest)
@@ -224,8 +228,7 @@ uint8_t ExtADC::getStatus(void)
 
 bool ExtADC::getData(I2CData& data)
 {
-	process(data);
-	return true;
+	return process(data);;
 }
 
 bool ExtADC::verifyI2cWrite(I2CData& data)
