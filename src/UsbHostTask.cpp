@@ -21,6 +21,7 @@
  */
 #include <UsbHostTask.h>
 #include "usbh_usr.h"
+#include "usbh_core.h"
 #include "stm32f4_discovery.h"
 
 extern __IO uint8_t LED_Toggle;
@@ -58,7 +59,8 @@ bool UsbHostTask::taskEntry()
 bool UsbHostTask::run(void *param)
 {
 	USBH_Process(&USB_OTG_Core, &USB_Host);
-	vTaskDelayMs(5);
+	if(!HCD_IsDeviceConnected(&USB_OTG_Core))
+		vTaskDelayMs(50); //delay only if no device attached
 	return true;
 }
 
