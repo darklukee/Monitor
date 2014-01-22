@@ -77,10 +77,14 @@ public:
 	}
 
 private:
+	unsigned int getFileName(void);
+	char* getHeader(char*);
 	unsigned long lastSave;
 	static bool connected;
 	static bool enabled;
 	FIL file; //FatFs file object
+
+	int fileIter;
 	char fileName[32];
 	UsbTaskState state;
 };

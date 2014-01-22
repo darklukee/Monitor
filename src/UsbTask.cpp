@@ -24,6 +24,7 @@
 #include <string.h>
 #include "usbh_usr.h"
 #include "DataStructures.h"
+#include <stdio.h> //sprintf
 
 extern xQueueHandle xQueue_Storage;
 extern xSemaphoreHandle xSemaphore_UsbMutex;
@@ -35,9 +36,11 @@ UsbTask::UsbTask() :
 	scheduler_task("UsbTask", 1024 * 10, PRIORITY_LOW, NULL)
 {
 	lastSave = 0;
+	fileIter = 0;
 	//setFrequency(20);
 	state = UsbTaskInit;
-	strcpy(fileName, "IV_monitor.csv");
+	//strcpy(fileName, "IV_monitor.csv");
+	getFileName();
 }
 
 bool UsbTask::init()
@@ -54,6 +57,10 @@ bool UsbTask::run(void *param)
 {
 	FRESULT fr;
 	static portTickType initTime;
+
+	const unsigned int size = 64;
+	char buf[size];
+
 	if ( xSemaphoreTake( xSemaphore_UsbMutex, ( portTickType ) 100 ) == pdTRUE)
 	{
 		switch (state)
@@ -63,9 +70,23 @@ bool UsbTask::run(void *param)
 			{
 				//vTaskDelay(OS_MS(100));
 				//TODO: dynamic filename, csv header
-				fr = f_open(&file, fileName, FA_CREATE_ALWAYS | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
+				fr = f_open(&file, fileName, FA_CREATE_NEW | FA_WRITE); //TODO: change to FA_OPEN_ALWAYS and f_lseek
+				while(fr == FR_EXIST && isOk())
+				{
+					getFileName();
+					fr = f_open(&file, fileName, FA_CREATE_NEW | FA_WRITE);
+				}
 				if (fr == FR_OK)
 				{
+					UINT bw;
+					getHeader(buf);
+					fr = f_write(&file, buf, strlen(buf), &bw);
+					if (fr != FR_OK || bw < strlen(buf))
+					{
+						state = UsbTaskDeInit;
+						setEnabled(false);
+					}
+					f_sync(&file);
 					state = UsbTaskRun;
 					initTime = xTaskGetTickCount();
 					xQueueReset(xQueue_Storage);
@@ -84,15 +105,12 @@ bool UsbTask::run(void *param)
 				StorageData data;
 				while (xQueueReceive(xQueue_Storage, &data, 50) && isOk() && !mutexTimeout) //wait for x ticks
 				{
-					const unsigned int size = 64;
-					char buf[size];
-//				static int iter = 0;
-					unsigned int len = sprintf(buf, "%lu,%f,%f,%lu\r\n", data.timeStamp - initTime, data.voltage, data.current,
+					unsigned int len = sprintf(buf, "%lu;%f;%f;%lu\r\n", data.timeStamp - initTime, data.voltage, data.current,
 						uxQueueMessagesWaiting(xQueue_Storage));
 					if (len <= size)
 					{
 						UINT bw;
-						fr = f_write(&file, buf, len, &bw); //TODO: dynamic size?
+						fr = f_write(&file, buf, len, &bw);
 						if (fr != FR_OK || bw < len)
 						{
 							state = UsbTaskDeInit;
@@ -163,4 +181,14 @@ void UsbTaskSetConnected(bool _connected)
 {
 	UsbTask::setConnected(_connected);
 }
+}
+
+unsigned int UsbTask::getFileName(void)
+{
+	return sprintf(fileName, "IV_monitor_%03d.csv", fileIter++);
+}
+
+char* UsbTask::getHeader(char * buffer)
+{
+	return strcpy(buffer,"Czas [ms];Napiecie [mV];Natezenie [mA];kolejka\r\n");
 }
