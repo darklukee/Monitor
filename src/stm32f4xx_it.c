@@ -199,76 +199,97 @@ void EXTI0_IRQHandler(void)
  */
 void EXTI3_IRQHandler(void)
 {
-	//TODO: stub
 	if (EXTI_GetITStatus(KEY_OK_EXTI_LINE) != RESET)
 	{
+		keyPressed |= 1 << KEY_OK;
+		uint8_t *key = &keyPressed;
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
+		KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_OK_EXTI_LINE);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
 }
 
 /**
- * @brief  Key ESC hander
+ * @brief  Key UP hander
  * @param  None
  * @retval None
  */
 void EXTI4_IRQHandler(void)
 {
-	//TODO: stub
-	if (EXTI_GetITStatus(KEY_ESC_EXTI_LINE) != RESET)
+
+	if (EXTI_GetITStatus(KEY_UP_EXTI_LINE) != RESET)
 	{
-		EXTI_ClearITPendingBit(KEY_ESC_EXTI_LINE);
+		keyPressed |= 1 << KEY_UP;
+		uint8_t *key = &keyPressed;
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
+		KeyboardTaskResume();
+		EXTI_ClearITPendingBit(KEY_UP_EXTI_LINE);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
 }
 
 /**
- * @brief  Arrow keys hander. Multiple EXTI lines to handle!
+ * @brief Keys hander. Multiple EXTI lines to handle!
  * @param  None
  * @retval None
  */
 void EXTI9_5_IRQHandler(void)
 {
-	//TODO: stub
-	if (EXTI_GetITStatus(EXTI_Line5) != RESET)
+	xHigherPriorityTaskWoken = pdFALSE;
+
+	if ((EXTI_GetITStatus(KEY_ESC_EXTI_LINE) != RESET))
 	{
-		//DO NOT use, something is wrong here
-		EXTI_ClearITPendingBit(EXTI_Line5);
+		keyPressed |= 1 << KEY_ESC;
+		uint8_t *key = &keyPressed;
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
+		KeyboardTaskResume();
+		EXTI_ClearITPendingBit(KEY_ESC_EXTI_LINE);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
-	if (EXTI_GetITStatus(KEY_UP_EXTI_LINE) != RESET)
-	{
-		EXTI_ClearITPendingBit(KEY_UP_EXTI_LINE);
-	}
-	if (EXTI_GetITStatus(KEY_DOWN_EXTI_LINE) != RESET)
-	{
-		EXTI_ClearITPendingBit(KEY_DOWN_EXTI_LINE);
-	}
+
 	if (EXTI_GetITStatus(KEY_LEFT_EXTI_LINE) != RESET)
 	{
-		EXTI_ClearITPendingBit(KEY_LEFT_EXTI_LINE);
-	}
-	if (EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
-	{
-		//		UsbTaskToggleEnabled(); //TODO: remove
-		xHigherPriorityTaskWoken = pdFALSE;
-		keyPressed |= 1 << KEY_RIGHT;
+		keyPressed |= 1 << KEY_LEFT;
 		uint8_t *key = &keyPressed;
-		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken); //TODO poiter, references of sth
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
+		KeyboardTaskResume();
+		EXTI_ClearITPendingBit(KEY_LEFT_EXTI_LINE);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+	}
+
+	if (EXTI_GetITStatus(KEY_DOWN_EXTI_LINE) != RESET)
+	{
+		keyPressed |= 1 << KEY_DOWN;
+		uint8_t *key = &keyPressed;
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
 		KeyboardTaskResume();
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+		EXTI_ClearITPendingBit(KEY_DOWN_EXTI_LINE);
+	}
+
+	if (EXTI_GetITStatus(KEY_RIGHT_EXTI_LINE) != RESET)
+	{
+		keyPressed |= 1 << KEY_RIGHT;
+		uint8_t *key = &keyPressed;
+		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
+		KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_RIGHT_EXTI_LINE);
+		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
 }
 
 void I2C3_ER_IRQHandler(void)
 {
-	//TODO: stub
+//TODO: stub
 	volatile uint32_t SR1Register, SR2Register;
 	/* Read the I2C1 status register */
 	SR1Register = ADC_I2C->SR1;
 	if (SR1Register & 0x0F00)
 	{ //an error
-		//error = true;
-		// I2C1error.error = ((SR1Register & 0x0F00) >> 8);        //save error
-		// I2C1error.job = job;    //the task
+//error = true;
+// I2C1error.error = ((SR1Register & 0x0F00) >> 8);        //save error
+// I2C1error.job = job;    //the task
 	}
 	/* If AF, BERR or ARLO, abandon the current job and commence new if there are jobs */
 	if (SR1Register & 0x0700)
@@ -307,7 +328,7 @@ void I2C3_EV_IRQHandler(void)
 	{
 		switch (event)
 		{
-		// EV5
+// EV5
 		case I2C_EVENT_MASTER_MODE_SELECT:
 			//Wyslanie adresu w trybie zapisujacego urzadzenia nadrzednego
 			I2C_Send7bitAddress(ADC_I2C, ExtADCAddr, I2C_Direction_Transmitter);
@@ -359,7 +380,7 @@ void I2C3_EV_IRQHandler(void)
 	{
 		switch (event)
 		{
-		// EV5
+// EV5
 		case I2C_EVENT_MASTER_MODE_SELECT:
 			if (!regSent)
 			{
