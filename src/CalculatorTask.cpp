@@ -30,7 +30,7 @@ extern xQueueHandle xQueue_AdcData;
 extern xQueueHandle xQueue_Storage;
 
 CalculatorTask::CalculatorTask() :
-	scheduler_task("CalculatorTask", 1024*2, PRIORITY_LOW, NULL)
+	scheduler_task("CalculatorTask", 1024 * 2, PRIORITY_LOW, NULL)
 {
 	voltageTabPt = 0;
 	currentTabPt = 0;
@@ -96,13 +96,18 @@ bool CalculatorTask::run(void *param)
 				uint16_t voltageRaw = (data.values[4] << 8) + data.values[5];
 				float voltage;
 				if (sign)
+				{
+					voltageRaw = ~(voltageRaw | (0xff << 14)) + 1; //bit inversion
 					voltage = -float(voltageRaw);
+				}
 				else
 					voltage = float(voltageRaw);
 				voltage *= VoltageLsb;
 
-				if (voltage > -4000 && voltage < 4900)
+				if (voltage > -400 && voltage < 4900)
+				{
 					addVoltage(voltage);
+				}
 				else //vlotage to high, need to use voltage divider
 				{
 					dataValid = (data.values[6] & (1 << 7)) != 0;
@@ -112,12 +117,15 @@ bool CalculatorTask::run(void *param)
 						data.values[6] = data.values[6] & (0b00111111); //clear data valid and sign
 						voltageRaw = (data.values[6] << 8) + data.values[7];
 						if (sign)
+						{
+							voltageRaw = ~(voltageRaw | (0xff << 14)) + 1; //bit inversion
 							voltage = -float(voltageRaw);
+						}
 						else
 							voltage = float(voltageRaw);
 						voltage *= VoltageLsb * VoltageDiv;
 
-						if (voltage > -4000 && voltage < 9800)
+						if (voltage > -400 && voltage < 10000)
 							addVoltage(voltage);
 					}
 				}
