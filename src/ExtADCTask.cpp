@@ -51,6 +51,7 @@ bool ExtADCTask::taskEntry()
 
 bool ExtADCTask::run(void *param)
 {
+	portTickType xLastWakeTime = xTaskGetTickCount();
 	uint8_t stat = extADC.getStatus();
 	//vTaskDelay(20);
 	if ((stat & 0b00001110) == 0b00001110) //(stat != 0) FIXME: 0b01110000
@@ -101,12 +102,12 @@ bool ExtADCTask::run(void *param)
 			xQueueSend(xQueue_AdcData, (void * ) &outputData, (portTickType ) 0);
 		}
 
-		vTaskDelay(5);
+		vTaskDelayUntil(&xLastWakeTime, OS_MS(7));
 	}
 	else
 	{
 		//int temp = xTaskGetTickCount();
-		vTaskDelay(2);
+		vTaskDelay(1);
 	}
 
 	return true;
