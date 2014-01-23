@@ -105,8 +105,7 @@ bool UsbTask::run(void *param)
 				StorageData data;
 				while (xQueueReceive(xQueue_Storage, &data, 50) && isOk() && !mutexTimeout) //wait for x ticks
 				{
-					unsigned int len = sprintf(buf, "%lu;%f;%f;%lu\r\n", data.timeStamp - initTime, data.voltage, data.current,
-						uxQueueMessagesWaiting(xQueue_Storage));
+					unsigned int len = sprintf(buf, "%lu;%f;%f\r\n", data.timeStamp - initTime, data.voltage, data.current);
 					if (len <= size)
 					{
 						UINT bw;
@@ -190,5 +189,5 @@ unsigned int UsbTask::getFileName(void)
 
 char* UsbTask::getHeader(char * buffer)
 {
-	return strcpy(buffer,"Czas [ms];Napiecie [mV];Natezenie [mA];kolejka\r\n");
+	return strcpy(buffer,"Czas [ms];Napiecie [mV];Natezenie [mA]\r\n");
 }
