@@ -35,13 +35,13 @@ extern xQueueHandle xQueue_Lcd_Log;
 xQueueHandle xQueue_Keyboard;
 uint8_t keyPressed; //for queue
 
-const int debouncePeriod = 5; //ms
+const int debouncePeriod = 3; //ms
 const int numOfKeys = KEYn; //without one on discovery board
-const int timesChecked = 15; //how many times button is checked;
+const int timesChecked = 20; //how many times button is checked;
 bool debounceEnabled[numOfKeys];
 bool debounceTable[numOfKeys][timesChecked];
 
-const int maxKeyDobounceCount = timesChecked + 5;
+const int maxKeyDobounceCount = timesChecked + timesChecked/3;
 int keyDebounceCount[numOfKeys];
 
 KeyboardTask::KeyboardTask() :
