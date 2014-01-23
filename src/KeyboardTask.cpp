@@ -27,22 +27,26 @@
 #include "UsbTask.h"
 #include "hw_config.h"
 
+#include "Lcd_Log_Messages.h"
+extern xQueueHandle xQueue_Lcd_Log;
+
+#include <stdio.h>
+
 xQueueHandle xQueue_Keyboard;
 uint8_t keyPressed; //for queue
 
 const int debouncePeriod = 5; //ms
 const int numOfKeys = KEYn; //without one on discovery board
-const int timesChecked = 5; //how many times button is checked;
+const int timesChecked = 15; //how many times button is checked;
 bool debounceEnabled[numOfKeys];
 bool debounceTable[numOfKeys][timesChecked];
 
-const int maxKeyDobounceCount = 6;
+const int maxKeyDobounceCount = timesChecked + 5;
 int keyDebounceCount[numOfKeys];
 
 KeyboardTask::KeyboardTask() :
 	scheduler_task("KeyboardTask", 1024, PRIORITY_LOW, NULL)
 {
-	// TODO Auto-generated constructor stub
 	debounceIter = 0;
 }
 
@@ -50,60 +54,69 @@ bool KeyboardTask::init()
 {
 	prvKeyboard_Config();
 	keyClearAll();
-	xQueue_Keyboard = xQueueCreate(10, sizeof(uint8_t*)); //TODO: set size
+	xQueue_Keyboard = xQueueCreate(2, sizeof(uint8_t*)); //TODO: set size
 	return true;
 }
 
 bool KeyboardTask::taskEntry()
 {
-	this->setFrequency(debouncePeriod);
+	//this->setFrequency(debouncePeriod);
 	return true;
 }
 
 bool KeyboardTask::run(void* param)
 {
 	//get from queue
-	uint8_t *key;
-	if (xQueueReceive(xQueue_Keyboard, &key, 0) == pdPASS)
+	uint8_t *key = NULL;
+
+	if (!enabledLeft()) //no enabled keys left, block task
 	{
-		if (*key > 0)
+		keyClearAll();
+		debounceIter = 0;
+		xQueuePeek(xQueue_Keyboard, &key, portMAX_DELAY); //only to block task, receiving elsewhere
+	}
+	xQueueReceive(xQueue_Keyboard, &key, 0);
+
+	if (key) //something received
+	{
+		for (uint8_t i = 0; i < numOfKeys && ((*key) > 0); i++)
 		{
-			for (uint8_t i = 0; i < numOfKeys && *key>0; i++)
+			if ((*key) & (1 << i))
 			{
-				if (*key & (1 << i))
-				{
-					debounceEnabled[i] = true;
-					*key &= (0xff - (1 << i));
-				}
+				debounceEnabled[i] = true;
+				(*key) &= (0xff - (1 << i));
 			}
 		}
 	}
+
 	debounce();
-
-	if (!enabledLeft()) //no enabled keys left, suspend task
-	{
-		vTaskSuspend(NULL); //suspend itself
-	}
-
+	vTaskDelayMs(debouncePeriod);
 	return true;
 }
 
 void KeyboardTask::keyAction(int key)
 {
+	LcdLogEnum log;
 	switch (key)
 	{
 	case KEY_UP:
+		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kUp), (portTickType ) 0);
 		break;
 	case KEY_DOWN:
+		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kDown), (portTickType ) 0);
 		break;
 	case KEY_LEFT:
+		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kLeft), (portTickType ) 0);
 		break;
 	case KEY_RIGHT:
-		UsbTask::toggleEnabled(); //TODO: remove
+		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kRight), (portTickType ) 0);
 		break;
 	case KEY_OK:
+		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kOk), (portTickType ) 0);
+		UsbTask::toggleEnabled(); //TODO: move?
 		break;
 	case KEY_ESC:
+		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kEsc), (portTickType ) 0);
 		break;
 	default:
 		break;
@@ -120,6 +133,7 @@ void KeyboardTask::debounce(void)
 			if (keyCheck(i))
 			{
 				keyAction(i);
+				keyClear(i);
 			}
 		}
 
@@ -148,7 +162,7 @@ bool KeyboardTask::keyCheck(int key)
 		if (debounceTable[key][i]) //true - not pressed
 			return false;
 	}
-	keyClear(key);
+	//keyClear(key);
 	return true;
 }
 

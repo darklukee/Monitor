@@ -204,7 +204,7 @@ void EXTI3_IRQHandler(void)
 		keyPressed |= 1 << KEY_OK;
 		uint8_t *key = &keyPressed;
 		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
-		KeyboardTaskResume();
+		//KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_OK_EXTI_LINE);
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
@@ -223,7 +223,7 @@ void EXTI4_IRQHandler(void)
 		keyPressed |= 1 << KEY_UP;
 		uint8_t *key = &keyPressed;
 		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
-		KeyboardTaskResume();
+		//KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_UP_EXTI_LINE);
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
@@ -243,7 +243,7 @@ void EXTI9_5_IRQHandler(void)
 		keyPressed |= 1 << KEY_ESC;
 		uint8_t *key = &keyPressed;
 		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
-		KeyboardTaskResume();
+		//KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_ESC_EXTI_LINE);
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
@@ -253,7 +253,7 @@ void EXTI9_5_IRQHandler(void)
 		keyPressed |= 1 << KEY_LEFT;
 		uint8_t *key = &keyPressed;
 		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
-		KeyboardTaskResume();
+		//KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_LEFT_EXTI_LINE);
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
@@ -263,7 +263,7 @@ void EXTI9_5_IRQHandler(void)
 		keyPressed |= 1 << KEY_DOWN;
 		uint8_t *key = &keyPressed;
 		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
-		KeyboardTaskResume();
+		//KeyboardTaskResume();
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		EXTI_ClearITPendingBit(KEY_DOWN_EXTI_LINE);
 	}
@@ -273,7 +273,7 @@ void EXTI9_5_IRQHandler(void)
 		keyPressed |= 1 << KEY_RIGHT;
 		uint8_t *key = &keyPressed;
 		xQueueSendFromISR(xQueue_Keyboard, (void* ) &key, &xHigherPriorityTaskWoken);
-		KeyboardTaskResume();
+		//KeyboardTaskResume();
 		EXTI_ClearITPendingBit(KEY_RIGHT_EXTI_LINE);
 		portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 	}
