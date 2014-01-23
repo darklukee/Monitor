@@ -53,7 +53,7 @@ public:
 		connected = _connected;
 		LcdLogEnum log;
 		if (connected)
-			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbCon), (portTickType ) 0); //FIXME: optimise/remove
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbCon), (portTickType ) 0);
 		else
 			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_usbDisCon), (portTickType ) 0);
 	}

@@ -51,7 +51,7 @@ bool DisplayTask::init()
 
 bool DisplayTask::taskEntry()
 {
-	this->setFrequency(100); //100ms
+//	this->setFrequency(100); //100ms
 //	GLCD.Init(INVERTED);
 	GLCD.Init();
 	GLCD.ClearScreen();
@@ -67,6 +67,7 @@ bool DisplayTask::taskEntry()
 
 bool DisplayTask::run(void *param)
 {
+	portTickType xLastWakeTime = xTaskGetTickCount();
 	static int i = 0;
 	char print[22];
 	LcdData values;
@@ -105,6 +106,7 @@ bool DisplayTask::run(void *param)
 	GLCD.Puts(print);
 	//Demo();
 
+	vTaskDelayUntil( &xLastWakeTime, OS_MS(100) );
 //	vTaskSuspend(this->getTaskHandle());
 	return true;
 }

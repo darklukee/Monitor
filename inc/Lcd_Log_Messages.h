@@ -26,13 +26,25 @@ static const char LcdLogTab[][22] =
 	{ "USB Connected",
 		"USB Disconnected",
 		"USB Enabled",
-		"USB Disabled"
+		"USB Disabled",
+		"Key Up",
+		"Key Down",
+		"Key Left",
+		"Key Right",
+		"Key Ok",
+		"Key Esc",
 	};
 enum LcdLogEnum
 {
 	LOG_usbCon = 0,
 	LOG_usbDisCon,
 	LOG_usbEn,
-	LOG_usbDis
+	LOG_usbDis,
+	LOG_kUp,
+	LOG_kDown,
+	LOG_kLeft,
+	LOG_kRight,
+	LOG_kOk,
+	LOG_kEsc,
 };
 #endif /* LCD_LOG_MESSAGES_H_ */
