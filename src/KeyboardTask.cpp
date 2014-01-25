@@ -112,8 +112,8 @@ void KeyboardTask::keyAction(int key)
 		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kRight), (portTickType ) 0);
 		break;
 	case KEY_OK:
-		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kOk), (portTickType ) 0);
-		UsbTask::toggleEnabled(); //TODO: move?
+		//xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kOk), (portTickType ) 0);
+		UsbTask::toggleEnabled();
 		break;
 	case KEY_ESC:
 		xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_kEsc), (portTickType ) 0);
