@@ -26,6 +26,8 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 
+#include "Lcd_Log_Messages.h"
+
 bool ExtADC::GPIO_Configured = false;
 //const uint8_t ExtADC::addr = 0x90;
 
@@ -166,13 +168,20 @@ bool ExtADC::i2cWrite(I2CData &data)
 	bool ok = false;
 	while (!ok)
 	{
-		if (xQueueReceive(xQueue_I2CEvent, &itCheck, portMAX_DELAY) == pdPASS)
+		if (xQueueReceive(xQueue_I2CEvent, &itCheck, 5000) == pdPASS)
 		{
 			if (itCheck == it)
 				ok = true;
 		}
+		else
+		{
+			//I2C deadlock, emergency break
+			LcdLogEnum log;
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_restart), (portTickType ) 0);
+			break;
+		}
 	}
-	return ok;
+	return true;
 }
 
 bool ExtADC::i2cRead(I2CData &data)
@@ -188,7 +197,7 @@ bool ExtADC::i2cRead(I2CData &data)
 	bool ok = false;
 	while (!ok)
 	{
-		if (xQueueReceive(xQueue_I2CEvent, &itCheck, 1000) == pdPASS)
+		if (xQueueReceive(xQueue_I2CEvent, &itCheck, 200) == pdPASS)
 		{
 			if (itCheck == it)
 			{
@@ -200,7 +209,8 @@ bool ExtADC::i2cRead(I2CData &data)
 		else
 		{
 			//I2C deadlock, emergency break
-			//TODO: log
+			LcdLogEnum log;
+			xQueueSend(xQueue_Lcd_Log, (void * ) &(log = LOG_i2cPac), (portTickType ) 0);
 			break;
 		}
 	}

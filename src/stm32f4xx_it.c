@@ -449,9 +449,8 @@ void I2C3_EV_IRQHandler(void)
 			break;
 		default:
 			//TODO: show info
-
 			errorCounter++;
-			if (errorCounter > 1000000)
+			if (errorCounter > 10000)
 			{
 				I2C_AcknowledgeConfig(ADC_I2C, DISABLE);
 				I2C_ReceiveData(ADC_I2C);
