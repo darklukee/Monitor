@@ -28,8 +28,22 @@
 struct LcdData
 {
 	float voltage;
+	float voltageMean;
+
 	float current;
-//	auto timeStamp; //TODO: add time and others
+	float currentMean;
+
+	float power;
+	float powerMean;
+	float energy;
+};
+
+struct LcdMinMaxData
+{
+	float voltageMin;
+	float voltageMax;
+	float currentMin;
+	float currentMax;
 };
 
 typedef enum

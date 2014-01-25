@@ -33,23 +33,42 @@ public:
 	bool run(void *param);
 
 private:
-	static const uint16_t tabSize = 30;
+	static const uint16_t tabSize = 20;
+	static const uint8_t lcdFreq = 250;
 
+	float voltageLast;
+	float voltageAcc;
+	int voltageAccCounter;
+//	float voltageMax;
+//	float volatageMin;
 	float voltageTab[tabSize];
 	float voltageMean;
 	uint16_t voltageTabPt;
-	float addVoltage(float);
+	void addVoltage(float);
 	float getVoltageMean(void);
+	float getVoltageMean(float);
 
+	float currentLast;
+	float currentAcc;
+	int currentAccCounter;
+//	float currentMax;
+//	float currentMin;
 	float currentTab[tabSize];
 	float currentMean;
 	uint16_t currentTabPt;
-	float addCurrent(float);
+	void addCurrent(float);
 	float getCurrentMean(void);
+	float getCurrentMean(float);
+
+	float energyTotal;
+	portTickType energyPrevTime;
+	void addEnergy(void);
+
+	void cleanAcc(void);
 
 //	portTickType timeTab[tabSize];
 //	uint16_t timeTabPt;
-	portTickType lastTimeStamp;
+	portTickType timeStampLast;
 	portTickType addTime(portTickType);
 
 	bool dataToLcd;

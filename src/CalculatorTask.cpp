@@ -36,7 +36,9 @@ CalculatorTask::CalculatorTask() :
 	currentTabPt = 0;
 	voltageMean = 0;
 	currentMean = 0;
-	lastTimeStamp = 0;
+	timeStampLast = 0;
+
+	//TODO: initialize all variables
 
 	dataToLcd = false;
 //	dataToStorage = false;
@@ -79,6 +81,7 @@ bool CalculatorTask::run(void *param)
 				addCurrent(current);
 			}
 		}
+
 		if (data.stat & (1 << 2)) //V3
 		{
 			bool dataValid = (data.values[4] & (1 << 7)) != 0;
@@ -95,9 +98,9 @@ bool CalculatorTask::run(void *param)
 				}
 				else
 					voltage = float(voltageRaw);
-				voltage *= VoltageLsb;
 
-				if (voltage > -400 && voltage < 4900)
+				voltage *= VoltageLsb;
+				if (voltage > -400 && voltage < 4950)
 				{
 					addVoltage(voltage);
 				}
@@ -124,7 +127,9 @@ bool CalculatorTask::run(void *param)
 				}
 			}
 		}
+
 		addTime(data.timeStamp);
+		addEnergy();
 
 		sendToLcd();
 		sendToStorage();
@@ -138,24 +143,12 @@ bool CalculatorTask::run(void *param)
  * @param voltage
  * @return
  */
-float CalculatorTask::addVoltage(float voltage)
+void CalculatorTask::addVoltage(float voltage)
 {
-	voltageTabPt++;
-	voltageTabPt %= tabSize;
-	voltageTab[voltageTabPt] = voltage;
+	voltageLast = voltage; //for usb storage
 
-	if (voltageTabPt == 0) //wyliczamy srednia co tabSize
-	{
-		dataToLcd = true;
-		float voltageTemp = 0;
-		for (int i = 0; i < tabSize; i++)
-		{
-			voltageTemp += voltageTab[i];
-		}
-		voltageMean = voltageTemp / tabSize;
-	}
-
-	return voltageMean;
+	voltageAcc += voltage;
+	voltageAccCounter++;
 }
 
 float CalculatorTask::getVoltageMean(void)
@@ -163,24 +156,30 @@ float CalculatorTask::getVoltageMean(void)
 	return voltageMean;
 }
 
-float CalculatorTask::addCurrent(float current)
+float CalculatorTask::getVoltageMean(float voltage)
 {
-	currentTabPt++;
-	currentTabPt %= tabSize;
-	currentTab[currentTabPt] = current;
+	voltageTabPt++;
+	voltageTabPt %= tabSize;
+	voltageTab[voltageTabPt] = voltage;
 
-	if (currentTabPt == 0) //wyliczamy srednia co tabSize
+//	if (voltageTabPt == 0) //wyliczamy srednia co tabSize
+//	{
+	float voltageTemp = 0;
+	for (int i = 0; i < tabSize; i++)
 	{
-		dataToLcd = true;
-		float currentTemp = 0;
-		for (int i = 0; i < tabSize; i++)
-		{
-			currentTemp += currentTab[i];
-		}
-		currentMean = currentTemp / tabSize;
+		voltageTemp += voltageTab[i];
 	}
+	voltageMean = voltageTemp / tabSize;
+//	}
+	return voltageMean;
+}
 
-	return currentMean;
+void CalculatorTask::addCurrent(float current)
+{
+	currentLast = current; //for usb storage
+
+	currentAcc += current;
+	currentAccCounter++;
 }
 
 float CalculatorTask::getCurrentMean(void)
@@ -188,24 +187,71 @@ float CalculatorTask::getCurrentMean(void)
 	return currentMean;
 }
 
+float CalculatorTask::getCurrentMean(float current)
+{
+
+	currentTabPt++;
+	currentTabPt %= tabSize;
+	currentTab[currentTabPt] = current;
+
+//	if (currentTabPt == 0) //wyliczamy srednia co tabSize
+//	{
+	float currentTemp = 0;
+	for (int i = 0; i < tabSize; i++)
+	{
+		currentTemp += currentTab[i];
+	}
+	currentMean = currentTemp / tabSize;
+//	}
+
+	return currentMean;
+}
+
+void CalculatorTask::addEnergy(void)
+{
+	if (energyPrevTime == 0)
+		energyPrevTime = timeStampLast;
+
+	energyTotal += voltageLast * currentLast * (timeStampLast - energyPrevTime) / 1000000000; //mV*mA*ms/1000000000 = J
+	energyPrevTime = timeStampLast;
+}
+
+void CalculatorTask::cleanAcc(void)
+{
+	voltageAcc = 0;
+	voltageAccCounter = 0;
+
+	currentAcc = 0;
+	currentAccCounter = 0;
+}
+
 portTickType CalculatorTask::addTime(portTickType timeStamp)
 {
 //	timeTabPt++;
 //	timeTabPt %= tabSize;
 //	timeTab[timeTabPt] = timeStamp;
-	lastTimeStamp = timeStamp;
-	return lastTimeStamp;
+	timeStampLast = timeStamp;
+	return timeStampLast;
 }
 
 void CalculatorTask::sendToLcd(void)
 {
-	if (dataToLcd)
+	static portTickType lastSend = 0;
+	if (lastSend + lcdFreq < xTaskGetTickCount())
 	{
 		LcdData outputData;
-		outputData.voltage = voltageMean;
-		outputData.current = currentMean;
+		outputData.voltage = voltageAcc / voltageAccCounter;
+		outputData.voltageMean = getVoltageMean(outputData.voltage);
+		outputData.current = currentAcc / currentAccCounter;
+		outputData.currentMean = getCurrentMean(outputData.current);
+		outputData.power = outputData.voltage * outputData.current / 1000; //data in mW
+		outputData.powerMean = outputData.voltageMean * outputData.currentMean / 1000; //data in mW
+		outputData.energy = energyTotal;
+		cleanAcc();
 		xQueueSendToFront(xQueue_Lcd, (void * ) &outputData, (portTickType ) 0);
 		dataToLcd = false;
+
+		lastSend = xTaskGetTickCount();
 	}
 }
 
@@ -214,9 +260,11 @@ void CalculatorTask::sendToStorage(void)
 	if (UsbTask::isOk())
 	{
 		StorageData outputData;
-		outputData.voltage = voltageTab[voltageTabPt];
-		outputData.current = currentTab[currentTabPt];
-		outputData.timeStamp = lastTimeStamp;
+//		outputData.voltage = voltageTab[voltageTabPt];
+//		outputData.current = currentTab[currentTabPt];
+		outputData.voltage = voltageLast;
+		outputData.current = currentLast;
+		outputData.timeStamp = timeStampLast;
 		xQueueSendToFront(xQueue_Storage, (void * ) &outputData, (portTickType ) 0);
 	}
 }
