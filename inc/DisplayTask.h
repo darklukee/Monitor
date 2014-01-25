@@ -39,6 +39,11 @@ private:
 	glcd GLCD;
 	bool toggle;
 	bool initiated;
+
+	void data(void);
+	void logger(void);
+	void timer(void);
+
 	void Demo();
 };
 

@@ -57,10 +57,7 @@ bool DisplayTask::taskEntry()
 	GLCD.ClearScreen();
 	GLCD.SelectFont(SystemFont5x7);
 //	GLCD.DefineArea(0,0,127,63);
-
 	initiated = true;
-	GLCD.CursorTo(0, 0);
-	printf("Voltage:% 10.3f mV\nCurrent:% 10.3f mA\n", 0.0, 0.0);
 
 	return true;
 }
@@ -68,47 +65,75 @@ bool DisplayTask::taskEntry()
 bool DisplayTask::run(void *param)
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
-	static int i = 0;
-	char print[22];
-	LcdData values;
-	if (xQueueReceive(xQueue_Lcd, &values, 0))
-	{
-		if (uxQueueMessagesWaiting(xQueue_Lcd) > 2)
-			xQueueReset(xQueue_Lcd); //discard old values
 
-		GLCD.CursorTo(8, 0);
-		sprintf(print,"% 10.3f", values.voltage);
-		GLCD.Puts(print);
-		GLCD.CursorTo(8, 1);
-		sprintf(print,"% 10.3f", values.current);
-		GLCD.Puts(print);
-		GLCD.CursorTo(0, 2);
-		sprintf(print,"%d", i);
-		GLCD.Puts(print);
-	}
+	//measurement data
+	data();
 
 	//logger
+	logger();
+
+	//timer
+	timer();
+
+	//Demo();
+
+	vTaskDelayUntil(&xLastWakeTime, OS_MS(100));
+//	vTaskSuspend(this->getTaskHandle());
+	return true;
+}
+
+void DisplayTask::data(void)
+{
+	char print[22];
+	LcdData values;
+	if (xQueueReceive(xQueue_Lcd, &values, 20))
+	{
+		//if (uxQueueMessagesWaiting(xQueue_Lcd) > 2)
+		xQueueReset(xQueue_Lcd); //always discard old values
+
+		GLCD.CursorTo(0, 0);
+		sprintf(print, "V[mV]:% 9.3f,% 5.0f\n", values.voltage, values.voltageMean);
+		GLCD.Puts(print);
+		sprintf(print, "I[mA]:% 9.3f,% 5.0f\n", values.current, values.currentMean);
+		GLCD.Puts(print);
+		sprintf(print, "P[mW]:% 9.3f,% 5.0f\n", values.power, values.powerMean);
+		GLCD.Puts(print);
+		sprintf(print, "W[J]:% 16.6f\n", values.energy);
+		GLCD.Puts(print);
+	}
+}
+
+void DisplayTask::logger()
+{
 	LcdLogEnum log;
 	if (xQueueReceive(xQueue_Lcd_Log, &log, 0))
 	{
-		const int lineSize = 5;
-		static int line = lineSize-1;
+		const int lineSize = 3;
+		static int line = lineSize - 1;
 		line++;
 		line %= lineSize;
-		GLCD.CursorTo(0,3+line);
+		if (line == 0) //clear log area
+		{
+			GLCD.CursorTo(0, 8 - lineSize);
+			for (int i = 0; i < lineSize; i++)
+				GLCD.Puts("                     \n");
+		}
+		GLCD.CursorTo(0, 8 - lineSize + line);
 		GLCD.Puts(LcdLogTab[log]);
-		GLCD.CursorTo(0,3+((line+1)%lineSize));
-		GLCD.Puts("                     ");
 	}
+}
 
-	GLCD.CursorTo(21-6, 7);
-	sprintf(print,"%6d", i++);
-	GLCD.Puts(print);
-	//Demo();
-
-	vTaskDelayUntil( &xLastWakeTime, OS_MS(100) );
-//	vTaskSuspend(this->getTaskHandle());
-	return true;
+void DisplayTask::timer()
+{
+	static portTickType last = 0;
+	if (last + 1000 < xTaskGetTickCount())
+	{
+		last = xTaskGetTickCount();
+		char print[22];
+		GLCD.CursorTo(0, 4);
+		sprintf(print, "t[s]: %15lu\n", last/1000); //in seconds
+		GLCD.Puts(print);
+	}
 }
 
 void DisplayTask::putChar(char ch)

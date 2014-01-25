@@ -22,8 +22,12 @@
 #ifndef LCD_LOG_MESSAGES_H_
 #define LCD_LOG_MESSAGES_H_
 
+extern xQueueHandle xQueue_Lcd_Log;
+
 static const char LcdLogTab[][22] =
-	{ "USB Connected",
+	{
+		"Need restart",
+		"USB Connected",
 		"USB Disconnected",
 		"USB Enabled",
 		"USB Disabled",
@@ -33,10 +37,12 @@ static const char LcdLogTab[][22] =
 		"Key Right",
 		"Key Ok",
 		"Key Esc",
+		"I2C packet missing"
 	};
 enum LcdLogEnum
 {
-	LOG_usbCon = 0,
+	LOG_restart = 0,
+	LOG_usbCon,
 	LOG_usbDisCon,
 	LOG_usbEn,
 	LOG_usbDis,
@@ -46,5 +52,6 @@ enum LcdLogEnum
 	LOG_kRight,
 	LOG_kOk,
 	LOG_kEsc,
+	LOG_i2cPac
 };
 #endif /* LCD_LOG_MESSAGES_H_ */
