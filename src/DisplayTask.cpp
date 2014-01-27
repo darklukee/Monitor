@@ -66,14 +66,14 @@ bool DisplayTask::run(void *param)
 {
 	portTickType xLastWakeTime = xTaskGetTickCount();
 
+	//timer
+	timer(xLastWakeTime);
+
 	//measurement data
 	data();
 
 	//logger
 	logger();
-
-	//timer
-	timer();
 
 	//Demo();
 
@@ -92,7 +92,7 @@ void DisplayTask::data(void)
 		xQueueReset(xQueue_Lcd); //always discard old values
 
 		GLCD.CursorTo(0, 0);
-		sprintf(print, "V[mV]:% 9.3f,% 5.0f\n", values.voltage, values.voltageMean);
+		sprintf(print, "U[mV]:% 9.3f,% 5.0f\n", values.voltage, values.voltageMean);
 		GLCD.Puts(print);
 		sprintf(print, "I[mA]:% 9.3f,% 5.0f\n", values.current, values.currentMean);
 		GLCD.Puts(print);
@@ -123,15 +123,15 @@ void DisplayTask::logger()
 	}
 }
 
-void DisplayTask::timer()
+void DisplayTask::timer(const portTickType tick)
 {
-	static portTickType last = 0;
-	if (last + 1000 < xTaskGetTickCount())
+	static portTickType lastSec = 0;
+	if(lastSec != tick/1000)
 	{
-		last = xTaskGetTickCount();
+		lastSec = tick/1000;
 		char print[22];
 		GLCD.CursorTo(0, 4);
-		sprintf(print, "t[s]: %15lu\n", last/1000); //in seconds
+		sprintf(print, "t[s]: %15lu\n", lastSec); //in seconds
 		GLCD.Puts(print);
 	}
 }

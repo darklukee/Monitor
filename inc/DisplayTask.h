@@ -42,7 +42,7 @@ private:
 
 	void data(void);
 	void logger(void);
-	void timer(void);
+	void timer(const portTickType);
 
 	void Demo();
 };
